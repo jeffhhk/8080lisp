@@ -45,17 +45,18 @@ COSMO_EMBED_FILES := \
 	ensure_emsdk_installed.sh ensure_emsdk_uninstalled.sh src/i8080_web_app.c src/i8080_web_app.h \
 	src/i8080web_main.c src/lisp_runtime_emscripten.c tests/i8080_web_test.c tools/text_to_c_header.py \
 	web/i8080web_shell.html
-LISP_GCC := $(BUILD_DIR)/lisp_gcc$(BINEXT)
+LISP_GCC := $(BUILD_DIR)/lisp_gcc
 LISP_TEST := $(BUILD_DIR)/lisp_test
 LISP_EMSCRIPTEN_RUNTIME_TEST := $(BUILD_DIR)/lisp_runtime_emscripten_test
-I8080_ASM := $(BUILD_DIR)/i8080asm$(BINEXT)
+I8080_ASM := $(BUILD_DIR)/i8080asm
 I8080_ASM_TEST := $(BUILD_DIR)/i8080_asm_test
-I8080_EMU := $(BUILD_DIR)/i8080emu$(BINEXT)
+I8080_EMU := $(BUILD_DIR)/i8080emu
 I8080_EMU_TEST := $(BUILD_DIR)/i8080_emu_test
 I8080_WEB_TEST := $(BUILD_DIR)/i8080_web_test
 LISP_INTERPRETER_TEST := $(BUILD_DIR)/lisp_interpreter_test
-OCR_VALIDATOR := $(BUILD_DIR)/ocr_validator$(BINEXT)
+OCR_VALIDATOR := $(BUILD_DIR)/ocr_validator
 OCR_VALIDATOR_TEST := $(BUILD_DIR)/ocr_validator_test
+I8080_COSMO := $(BUILD_DIR)/8080LISP$(BINEXT)
 I8080_WEB := $(BUILD_DIR)/i8080web.html
 
 .PHONY: clean build build-cosmo build-cosmo-inner package-cosmo test lisp-gcc lisp-test i8080asm i8080emu i8080web ocr-validator
@@ -130,6 +131,8 @@ package-cosmo: $(I8080_EMU)
 	mv $(I8080_EMU) $(I8080_EMU).zip
 	zip $(I8080_EMU).zip $(COSMO_EMBED_FILES)
 	mv $(I8080_EMU).zip $(I8080_EMU)
+
+package-web: $(I8080_WEB)
 
 test: lisp-test $(LISP_EMSCRIPTEN_RUNTIME_TEST) $(I8080_EMU) $(I8080_ASM_TEST) $(I8080_EMU_TEST) $(I8080_WEB_TEST) $(LISP_INTERPRETER_TEST) $(OCR_VALIDATOR_TEST)
 	./$(LISP_TEST)

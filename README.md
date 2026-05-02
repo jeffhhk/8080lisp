@@ -16,25 +16,21 @@ I took the 8080 LISP article, OCRed only the listing, and vibe coded an assemble
 
 You can do things like this:
 
-    $ printf 'NULL (NIL) \n' | ./i8080emulisp.com src/lisp_8080_corrected.asm
+    $ printf 'NULL (NIL) \n' | ./8080lisp.com src/lisp_8080_corrected.asm
 
     >>T
-    $ printf 'NULL ((NIL)) \n' | ./i8080emulisp.com src/lisp_8080_corrected.asm
+    $ printf 'NULL ((NIL)) \n' | ./8080lisp.com src/lisp_8080_corrected.asm
 
     >>F
 
-Running `./o/i8080emulisp.com src/lisp_8080_corrected.asm` gives a REPL, but note the eccentric syntax in the commands above.
-
-There is also an optional browser target now: `make i8080web` produces
-`o/i8080web.html`, a standalone page that bundles the compiled emulator and
-`src/lisp_8080_corrected.asm` into one textarea-driven monitor UI.
+Running `./8080lisp.com src/lisp_8080_corrected.asm` gives a REPL, but note the eccentric syntax in the commands above.
 
 I also implemented a coverage feature, so that using a REPL can help browse the working code.  Evaluating a very simple expression has lots of uninteresting coverage, like the reader, etc, so there's a mechanism for taking a baseline and then printing the residual.  Here's what happens if we ask if the list of NIL is NULL (false), and compare it what happens with doing the same for a list of two NILS:
 
-    $ printf 'NULL ((NIL)) \n' | ./i8080emulisp.com  --coverage-out coverage-baseline.ndjson src/lisp_8080_corrected.asm
+    $ printf 'NULL ((NIL)) \n' | ./8080lisp.com  --coverage-out coverage-baseline.ndjson src/lisp_8080_corrected.asm
 
     >>F
-    $ printf 'NULL ((NIL NIL)) \n' | ./i8080emulisp.com  --coverage-baseline-boolean coverage-baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm
+    $ printf 'NULL ((NIL NIL)) \n' | ./8080lisp.com  --coverage-baseline-boolean coverage-baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm
 
     >>F
     source coverage:
@@ -63,8 +59,14 @@ The article exhibits a mixed source and machine code listing, with source code t
 
 A provenance report reconciles each of 6 minor differences between the raw OCR listing and the one that runs.
 
+## Cosmopositan binary
+
 It is preserved in a cosmopolitan binary, which will run on any Mac, Linux or Windows machine that supports Intel 64 bit executables.  Cosmopolitan binaries are also zip files.  Source code and artifacts (including the original PDF) are preserved in its zip structure.  To run the examples above, you have to get the lisp binary out of it first, as noted in the usage string:
 
-    unzip o/i8080emulisp.com src/lisp_8080_corrected.asm
+    unzip 8080lisp.com src/lisp_8080_corrected.asm
 
 Artifacts include the original PDF, and the automatically gathered prompts used to create the project.
+
+## Emscripten binary
+
+The make target `package-web` also produces as single file HTML page `o/i8080web.html` containing an emscripten-based emulator hosting a REPL.
