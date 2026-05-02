@@ -442,3 +442,25 @@
       result: 24 tests 0 failures 0 skipped
     - verification: printf 'NULL (NIL) \n' | ./o/i8080emu --coverage-source-display-on-exit src/lisp_8080_corrected.asm
       result: printed >>T, then a separating newline, then a compressed source coverage report with covered lines and ellipsis gaps
+- meta: {_: feature, guid: t5m1}
+  title: Add baseline subtraction for emulator source coverage display
+  prompt: |
+    Implement --coverage-baseline baseline.ndjson:
+        printf 'CAR ((T.F)) \n' | timeout 2s ./o/i8080emu --coverage-baseline baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm
+
+    When a baseline is provided, before displaying the final source run, subtract off the baseline coverage as "not interesting".  Only display the lines that are in excess of the baseline.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 25 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/i8080_emu_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/i8080_emu_test.c and rerun make test
+      result: 25 tests 0 failures 0 skipped
+    - verification: printf 'CAR ((T.F)) \n' | ./o/i8080emu --coverage-out /tmp/i8080_cov_baseline.ndjson src/lisp_8080_corrected.asm
+      result: wrote a baseline NDJSON file for the monitor query, while also revealing that the current `CAR ((T.F))` evaluator output is corrupted and should be tracked separately
+    - verification: printf 'CAR ((T.F)) \n' | timeout 2s ./o/i8080emu --coverage-baseline /tmp/i8080_cov_baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm
+      result: subtracted the identical baseline and printed only the evaluation result plus an empty `source coverage:` section with no residual covered lines

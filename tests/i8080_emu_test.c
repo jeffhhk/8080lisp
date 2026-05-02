@@ -302,6 +302,70 @@ static void test_cli_displays_compressed_covered_source_on_exit(void) {
                       "| MVI A,'B'\n");
 }
 
+static void test_cli_subtracts_coverage_baseline_from_source_display(void) {
+  static const char *program =
+      "ORG 0000H\n"
+      "MVI A,'A'\n"
+      "CALL 0F009H\n"
+      "JMP DONE\n"
+      "MVI A,'B'\n"
+      "DONE: HLT\n";
+  static const char *baseline =
+      "{\"kind\":\"address\",\"address\":0,\"address_hex\":\"0x0000\",\"hits\":1}\n"
+      "{\"kind\":\"address\",\"address\":2,\"address_hex\":\"0x0002\",\"hits\":1}\n"
+      "{\"kind\":\"summary\",\"covered_addresses\":2,\"total_instruction_fetches\":2}\n";
+  char asm_path[128];
+  char baseline_path[128];
+  char output_path[128];
+  char command[512];
+  char output_text[2048];
+  int status;
+
+  snprintf(asm_path, sizeof(asm_path), "/tmp/i8080_covbase_%ld.asm",
+           (long)getpid());
+  snprintf(baseline_path, sizeof(baseline_path), "/tmp/i8080_covbase_%ld.ndjson",
+           (long)getpid());
+  snprintf(output_path, sizeof(output_path), "/tmp/i8080_covbase_%ld.txt",
+           (long)getpid());
+
+  if (!write_file_text(asm_path, program) ||
+      !write_file_text(baseline_path, baseline)) {
+    return;
+  }
+
+  snprintf(command, sizeof(command),
+           "./o/i8080emu --coverage-baseline %s "
+           "--coverage-source-display-on-exit %s > %s",
+           baseline_path, asm_path, output_path);
+  status = system(command);
+  if (status == -1) {
+    fprintf(stderr, "coverage-baseline command failed to launch\n");
+    failures += 1;
+    return;
+  }
+  if (!WIFEXITED(status)) {
+    fprintf(stderr, "coverage-baseline command did not exit cleanly\n");
+    failures += 1;
+    return;
+  }
+  expect_int("coverage-baseline command exited", WEXITSTATUS(status), 0);
+  if (!read_file_text(output_path, output_text, sizeof(output_text))) {
+    return;
+  }
+
+  expect_contains("coverage-baseline output prefix", output_text,
+                  "A\nsource coverage:\n");
+  expect_not_contains("coverage-baseline line 2 removed", output_text,
+                      "| MVI A,'A'\n");
+  expect_not_contains("coverage-baseline line 3 removed", output_text,
+                      "| CALL 0F009H\n");
+  expect_contains("coverage-baseline line 4 kept", output_text,
+                  "| JMP DONE\n");
+  expect_contains("coverage-baseline line 6 kept", output_text,
+                  "| DONE: HLT\n");
+  expect_contains("coverage-baseline ellipsis", output_text, "...\n");
+}
+
 static void test_cli_evaluates_identity_lambda_of_three_from_stdin(void) {
   char output_path[128];
   char command[320];
@@ -366,14 +430,15 @@ int main(void) {
   test_original_image_boots_to_the_monitor_loop();
   test_cli_writes_coverage_ndjson();
   test_cli_displays_compressed_covered_source_on_exit();
+  test_cli_subtracts_coverage_baseline_from_source_display();
   test_cli_evaluates_identity_lambda_of_three_from_stdin();
   test_cli_null_queries_print_boolean_results();
 
   if (failures != 0) {
-    fprintf(stderr, "7 tests %d failures 0 skipped\n", failures);
+    fprintf(stderr, "8 tests %d failures 0 skipped\n", failures);
     return 1;
   }
 
-  puts("7 tests 0 failures 0 skipped");
+  puts("8 tests 0 failures 0 skipped");
   return 0;
 }

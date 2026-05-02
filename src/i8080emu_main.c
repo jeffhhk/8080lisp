@@ -4,6 +4,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef struct {
@@ -108,9 +109,89 @@ static int write_coverage_ndjson(const char *path,
   return 1;
 }
 
+static int parse_size_t_field(const char *line, const char *name,
+                              size_t *value) {
+  char pattern[32];
+  char *field = NULL;
+  char *end = NULL;
+  unsigned long long parsed;
+
+  snprintf(pattern, sizeof(pattern), "\"%s\":", name);
+  field = strstr(line, pattern);
+  if (field == NULL) {
+    return 0;
+  }
+  field += strlen(pattern);
+  parsed = strtoull(field, &end, 10);
+  if (end == field) {
+    return 0;
+  }
+  *value = (size_t)parsed;
+  return 1;
+}
+
+static int read_coverage_ndjson(const char *path, i8080_coverage *coverage) {
+  FILE *stream;
+  char line[256];
+
+  stream = fopen(path, "r");
+  if (stream == NULL) {
+    fprintf(stderr, "%s: %s\n", path, strerror(errno));
+    return 0;
+  }
+
+  i8080_coverage_reset(coverage);
+  while (fgets(line, sizeof(line), stream) != NULL) {
+    size_t address;
+    size_t hits;
+
+    if (strstr(line, "\"kind\":\"summary\"") != NULL) {
+      continue;
+    }
+    if (strstr(line, "\"kind\":\"address\"") == NULL) {
+      fprintf(stderr, "%s: invalid coverage record\n", path);
+      fclose(stream);
+      return 0;
+    }
+    if (!parse_size_t_field(line, "address", &address) ||
+        !parse_size_t_field(line, "hits", &hits) ||
+        address >= I8080_IMAGE_SIZE) {
+      fprintf(stderr, "%s: invalid coverage record\n", path);
+      fclose(stream);
+      return 0;
+    }
+    coverage->ip_hits[address] = hits;
+  }
+
+  if (ferror(stream)) {
+    fprintf(stderr, "%s: %s\n", path, strerror(errno));
+    fclose(stream);
+    return 0;
+  }
+  fclose(stream);
+  return 1;
+}
+
+static void subtract_coverage(i8080_coverage *coverage,
+                              const i8080_coverage *baseline) {
+  size_t address;
+
+  for (address = 0; address < I8080_IMAGE_SIZE; ++address) {
+    size_t baseline_hits = baseline->ip_hits[address];
+    size_t hits = coverage->ip_hits[address];
+
+    if (hits <= baseline_hits) {
+      coverage->ip_hits[address] = 0;
+      continue;
+    }
+    coverage->ip_hits[address] = hits - baseline_hits;
+  }
+}
+
 static int parse_args(int argc, char **argv, int *emit_coverage,
                       int *capture_coverage,
                       int *display_coverage_source_on_exit,
+                      const char **coverage_baseline_path,
                       const char **coverage_out_path,
                       const char **program_path) {
   int i;
@@ -118,6 +199,7 @@ static int parse_args(int argc, char **argv, int *emit_coverage,
   *emit_coverage = 0;
   *capture_coverage = 0;
   *display_coverage_source_on_exit = 0;
+  *coverage_baseline_path = NULL;
   *coverage_out_path = NULL;
   *program_path = NULL;
 
@@ -138,6 +220,14 @@ static int parse_args(int argc, char **argv, int *emit_coverage,
     if (strcmp(argv[i], "--coverage-source-display-on-exit") == 0) {
       *capture_coverage = 1;
       *display_coverage_source_on_exit = 1;
+      continue;
+    }
+    if (strcmp(argv[i], "--coverage-baseline") == 0) {
+      if (i + 1 >= argc) {
+        return 0;
+      }
+      *capture_coverage = 1;
+      *coverage_baseline_path = argv[++i];
       continue;
     }
     if (*program_path != NULL) {
@@ -165,7 +255,10 @@ int main(int argc, char **argv) {
       .ctx = &host_io,
   };
   const char *program_path = NULL;
+  const char *coverage_baseline_path = NULL;
   const char *coverage_out_path = NULL;
+  i8080_coverage display_coverage;
+  i8080_coverage baseline_coverage;
   int capture_coverage = 0;
   int display_coverage_source_on_exit = 0;
   int emit_coverage = 0;
@@ -173,11 +266,13 @@ int main(int argc, char **argv) {
 
   if (!parse_args(argc, argv, &emit_coverage, &capture_coverage,
                   &display_coverage_source_on_exit,
+                  &coverage_baseline_path,
                   &coverage_out_path,
                   &program_path)) {
     fprintf(stderr,
             "usage: %s [--coverage] [--coverage-out path] "
-            "[--coverage-source-display-on-exit] program.asm\n",
+            "[--coverage-source-display-on-exit] "
+            "[--coverage-baseline path] program.asm\n",
             argv[0]);
     return 1;
   }
@@ -202,9 +297,16 @@ int main(int argc, char **argv) {
     write_coverage_report(stderr, &coverage);
   }
   if (display_coverage_source_on_exit) {
+    display_coverage = coverage;
+    if (coverage_baseline_path != NULL) {
+      if (!read_coverage_ndjson(coverage_baseline_path, &baseline_coverage)) {
+        return 1;
+      }
+      subtract_coverage(&display_coverage, &baseline_coverage);
+    }
     putchar('\n');
     if (!i8080_write_coverage_source_display(stdout, program_path, &image,
-                                             &coverage, &error)) {
+                                             &display_coverage, &error)) {
       fprintf(stderr, "%s: %s\n", program_path, error.message);
       return 1;
     }

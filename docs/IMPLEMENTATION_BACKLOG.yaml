@@ -127,3 +127,40 @@
     - file: src/i8080_coverage_source_display.c
     - file: src/i8080emu_main.c
     - file: tests/i8080_emu_test.c
+
+- meta: {_: feature, id: PORT-0002K, status: done, priority: medium, guid: k6r9}
+  title: Add baseline subtraction for emulator source coverage display
+  expected_behavior: |
+    The emulator CLI should be able to subtract a saved NDJSON coverage baseline
+    from a completed run before rendering compressed source coverage, so only
+    coverage in excess of the baseline is displayed.
+  evidence:
+    - evidence: `o/i8080emu` now accepts `--coverage-baseline path` and subtracts baseline address hits before `--coverage-source-display-on-exit` renders source lines.
+    - evidence: `tests/i8080_emu_test.c` writes a baseline NDJSON fixture and validates that baseline-covered lines are omitted while residual covered lines still appear.
+  related:
+    - file: src/i8080emu_main.c
+    - file: tests/i8080_emu_test.c
+    - file: docs/BUILD.md
+    - file: docs/Reference.md
+
+- meta: {_: bug, id: PORT-0002L, status: open, priority: medium, guid: l2c7}
+  title: CAR monitor evaluation should not print corrupted list output
+  expected_behavior: |
+    Evaluating `CAR ((T.F))` through the monitor CLI should print a compact Lisp
+    result rather than a list padded with NUL bytes and repeated structure data.
+  evidence:
+    - evidence: `docs/Reference.md` currently lists `printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm` as an emulator example.
+    - evidence: During PORT-0002K verification, `printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm` printed a long corrupted `>>(((...` result containing many embedded NUL bytes instead of a compact printed value.
+    - evidence: Re-running the same query with `--coverage-baseline /tmp/i8080_cov_baseline.ndjson --coverage-source-display-on-exit` reproduced the same corrupted evaluation result before the source coverage header.
+  acceptance:
+    - acceptance: Reproduce the corrupted `CAR ((T.F))` CLI output in an automated test or otherwise disprove it.
+    - acceptance: Determine whether the fault is in `EVAL`, `CAR`, or `OUTPUT` path selection and rendering.
+    - acceptance: Validate the corrected CLI result for `CAR ((T.F))`.
+  related:
+    - development_log: t5m1
+    - file: docs/Reference.md
+    - file: src/lisp_8080_corrected.asm
+    - file: tests/i8080_emu_test.c
+  notes: |
+    Current containment is to avoid relying on this query as a correctness
+    example until the evaluator and renderer path are reconciled.

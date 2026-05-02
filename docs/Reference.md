@@ -80,6 +80,9 @@ This manual reflects the behavior validated by the current `make test` fixture.
 - When `o/i8080emu` is invoked as
   `o/i8080emu --coverage-source-display-on-exit program.asm`, it prints a
   newline-prefixed `source coverage:` report to stdout after execution.
+- When `--coverage-baseline coverage.ndjson` is also provided, the emulator
+  subtracts the baseline address hits from the completed run before rendering
+  source coverage, and only positive residual coverage is displayed.
 - Each nonzero coverage line has the form `0xADDR COUNT`, where `COUNT` is how
   many times that address became the instruction pointer for an opcode fetch.
 - Each NDJSON address record includes `kind`, `address`, `address_hex`, and
@@ -99,3 +102,4 @@ This manual reflects the behavior validated by the current `make test` fixture.
     printf '(LAMBDA (X) X) (3) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
     printf 'NULL (NIL) \nNULL ((NIL)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
     printf 'NULL (NIL) \n' | ./o/i8080emu --coverage-source-display-on-exit src/lisp_8080_corrected.asm
+    printf 'NULL (NIL) \n' | ./o/i8080emu --coverage-baseline baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm

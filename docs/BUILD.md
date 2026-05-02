@@ -23,7 +23,10 @@ the file ends with one `summary` record. `--coverage` and `--coverage-out` may
 be used together. Pass `--coverage-source-display-on-exit` before the assembly
 path to print a newline-prefixed `source coverage:` report to stdout after the
 program output; the report shows only covered source lines with per-line hit
-totals and inserts `...` between non-adjacent covered lines.
+totals and inserts `...` between non-adjacent covered lines. Pass
+`--coverage-baseline path` together with `--coverage-source-display-on-exit` to
+subtract baseline per-address hits before the source lines are aggregated, so
+only coverage in excess of the baseline is displayed.
 
 The OCR validator binary is written to `o/ocr_validator`. With no arguments it
 validates `orig/lisp_8080_rawocr_2026-04-13.asm`,
