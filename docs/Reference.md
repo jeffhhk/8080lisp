@@ -53,6 +53,8 @@ This manual reflects the behavior validated by the current `make test` fixture.
   provenance ledger at field granularity.
 - The validator recognizes discrepancies in `bytes`, `label`, `mnemonic`,
   `operand`, `comment`, and `whole_line`.
+- Address-only line moves do not require provenance entries; a discrepancy is
+  recorded only when the machine code or assembly text for the line changes.
 - Provenance `basis` values are restricted to `instruction-encoding`,
   `cross-reference`, `control-flow`, `duplicate-pattern`, `runtime-behavior`,
   and `scan-review`.

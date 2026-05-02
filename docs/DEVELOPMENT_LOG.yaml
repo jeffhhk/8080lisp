@@ -284,3 +284,18 @@
       result: 18 tests 0 failures 0 skipped
     - verification: ./o/ocr_validator
       result: validated orig/lisp_8080_rawocr_2026-04-13.asm against src/lisp_8080_corrected.asm and docs/OCR_CORRECTIONS.yaml
+- meta: {_: bug, guid: m7c4}
+  title: OCR provenance should ignore address-only line changes
+  prompt: |
+    In the provenance report, do not consider a line difference if only the address of the line has changed.  Do consider it different if the machine code for the line is different.
+  verifications:
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 20 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/ocr_validator_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/ocr_validator_test.c and rerun make test
+      result: 20 tests 0 failures 0 skipped
+    - verification: ./o/ocr_validator
+      result: validated orig/lisp_8080_rawocr_2026-04-13.asm against src/lisp_8080_corrected.asm and docs/OCR_CORRECTIONS.yaml

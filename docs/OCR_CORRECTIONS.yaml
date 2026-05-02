@@ -10,216 +10,198 @@
 - id: OCR-0002
   line_number: 11
   address: 0x0000
-  field: whole_line
-  original: "0000 C3 B6 04       0011 CADDR  CALL CDR"
-  corrected: "0003 CD 10 00       0011 CADDR  CALL CDR"
+  field: bytes
+  original: "C3 B6 04"
+  corrected: "CD 10 00"
   evidence: "The object-code stream in the opening block is shifted one source line late in the raw OCR; moving CADDR to 0x0003 restores the monotonic decode sequence."
-  basis: duplicate-pattern
-  confidence: high
-- id: OCR-0003
-  line_number: 12
-  address: 0x0003
-  field: whole_line
-  original: "0003 CD 10 00       0012 CADR   CALL CDR"
-  corrected: "0006 CD 10 00       0012 CADR   CALL CDR"
-  evidence: "The adjacent call stubs are a repeated pattern, and placing CADR at 0x0006 preserves the sequential three-byte call layout."
   basis: duplicate-pattern
   confidence: high
 - id: OCR-0004
   line_number: 13
   address: 0x0006
-  field: whole_line
-  original: "0006 CD 10 00       0013 CAR    PUSH PSW     SAVE A,F"
-  corrected: "0009 F5             0013 CAR    PUSH PSW     SAVE A,F"
+  field: bytes
+  original: "CD 10 00"
+  corrected: "F5"
   evidence: "PUSH PSW encodes as F5, and direct routine probes already use CAR's real entry at 0x0009."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0005
   line_number: 14
   address: 0x0009
-  field: whole_line
-  original: "0009 F5             0014 CAR2   MOV  A,M     GET CAR/CDR PTR"
-  corrected: "000A 7E             0014 CAR2   MOV  A,M     GET CAR/CDR PTR"
+  field: bytes
+  original: "F5"
+  corrected: "7E"
   evidence: "MOV A,M encodes as 7E, so CAR2 must follow CAR at 0x000A within the shifted opening block."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0006
   line_number: 15
   address: 0x000A
-  field: whole_line
-  original: "000A 7E             0015        INX  H"
-  corrected: "000B 23             0015        INX  H"
+  field: bytes
+  original: "7E"
+  corrected: "23"
   evidence: "The shifted block resumes the normal byte-to-source alignment when INX H is moved onto opcode 23 at the next address."
   basis: duplicate-pattern
   confidence: high
 - id: OCR-0007
   line_number: 16
   address: 0x000B
-  field: whole_line
-  original: "000B 23             0016        MOV  H,M     HL:=CAR(HL)"
-  corrected: "000C 66             0016        MOV  H,M     HL:=CAR(HL)"
+  field: bytes
+  original: "23"
+  corrected: "66"
   evidence: "MOV H,M encodes as 66, which belongs at 0x000C once the opening one-line shift is removed."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0008
   line_number: 17
   address: 0x000C
-  field: whole_line
-  original: "000C 66             0017        MOV  L,A"
-  corrected: "000D 6F             0017        MOV  L,A"
+  field: bytes
+  original: "66"
+  corrected: "6F"
   evidence: "MOV L,A encodes as 6F, so the object-byte column was copied from the previous line in the raw OCR."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0009
   line_number: 18
   address: 0x000D
-  field: whole_line
-  original: "000D 6F             0018        POP  PSW"
-  corrected: "000E F1             0018        POP  PSW"
+  field: bytes
+  original: "6F"
+  corrected: "F1"
   evidence: "POP PSW encodes as F1, confirming that the raw OCR remained one line behind through the CAR body."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0010
   line_number: 19
   address: 0x000E
-  field: whole_line
-  original: "000E F1             0019        RET"
-  corrected: "000F C9             0019        RET"
+  field: bytes
+  original: "F1"
+  corrected: "C9"
   evidence: "RET encodes as C9 and closes the CAR entry sequence at the next address."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0011
   line_number: 20
   address: 0x000F
-  field: whole_line
-  original: "000F C9             0020 CDR    PUSH PSW"
-  corrected: "0010 F5             0020 CDR    PUSH PSW"
+  field: bytes
+  original: "C9"
+  corrected: "F5"
   evidence: "The CDR entry point must begin immediately after CAR returns, and PUSH PSW encodes as F5 at 0x0010."
   basis: control-flow
   confidence: high
 - id: OCR-0012
   line_number: 21
   address: 0x0010
-  field: whole_line
-  original: "0010 F5             0021        INX  H        SKIP CAR PTR"
-  corrected: "0011 23             0021        INX  H        SKIP CAR PTR"
+  field: bytes
+  original: "F5"
+  corrected: "23"
   evidence: "The CDR body is a straight-line sequence after its entry push, so INX H must move to the next address with opcode 23."
   basis: control-flow
-  confidence: high
-- id: OCR-0013
-  line_number: 22
-  address: 0x0011
-  field: whole_line
-  original: "0011 23             0022        INX  H        FOR HL:=CDR(HL)"
-  corrected: "0012 23             0022        INX  H        FOR HL:=CDR(HL)"
-  evidence: "The duplicated INX H sequence in CDR confirms a one-line shift rather than a change in instruction content."
-  basis: duplicate-pattern
   confidence: high
 - id: OCR-0014
   line_number: 23
   address: 0x0012
-  field: whole_line
-  original: "0012 23             0023        JMP  CAR2"
-  corrected: "0013 C3 0A 00       0023        JMP  CAR2"
+  field: bytes
+  original: "23"
+  corrected: "C3 0A 00"
   evidence: "JMP CAR2 must encode as C3 0A 00 to branch back to the shared CAR2 entry."
   basis: cross-reference
   confidence: high
 - id: OCR-0015
   line_number: 24
   address: 0x0013
-  field: whole_line
-  original: "0013 C3 0A 00       0024 CONS   PUSH PSW     SAVE NEW CDR VALUE"
-  corrected: "0016 D5             0024 CONS   PUSH PSW     SAVE NEW CDR VALUE"
+  field: bytes
+  original: "C3 0A 00"
+  corrected: "D5"
   evidence: "Later CALL CONS sites target 0x0016, so the CONS label and its opening stack save must start there instead of on the preceding jump bytes."
   basis: cross-reference
   confidence: high
 - id: OCR-0016
   line_number: 25
   address: 0x0016
-  field: whole_line
-  original: "0016 D5             0025        PUSH H       SAVE NEW CAR VALUE"
-  corrected: "0017 E5             0025        PUSH H       SAVE NEW CAR VALUE"
+  field: bytes
+  original: "D5"
+  corrected: "E5"
   evidence: "PUSH H encodes as E5, continuing the one-line OCR shift through the CONS prologue."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0017
   line_number: 26
   address: 0x0017
-  field: whole_line
-  original: "0017 E5             0026        LXI  D,4      NEED 4 BYTES"
-  corrected: "0018 11 04 00       0026        LXI  D,4      NEED 4 BYTES"
+  field: bytes
+  original: "E5"
+  corrected: "11 04 00"
   evidence: "LXI D,4 encodes as 11 04 00 and occupies the three bytes starting at 0x0018."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0018
   line_number: 27
   address: 0x0018
-  field: whole_line
-  original: "0018 11 04 00       0027        CALL GMEM    GET MEMORY"
-  corrected: "001B CD AD 05       0027        CALL GMEM    GET MEMORY"
+  field: bytes
+  original: "11 04 00"
+  corrected: "CD AD 05"
   evidence: "CALL GMEM must encode as CD AD 05 to reach the allocator entry already used by the image."
   basis: cross-reference
   confidence: high
 - id: OCR-0019
   line_number: 28
   address: 0x001B
-  field: whole_line
-  original: "001B CD AD 05       0028        POP  D       CAR VALUE"
-  corrected: "001E D1             0028        POP  D       CAR VALUE"
+  field: bytes
+  original: "CD AD 05"
+  corrected: "D1"
   evidence: "POP D encodes as D1 and follows the three-byte GMEM call in the CONS body."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0020
   line_number: 29
   address: 0x001E
-  field: whole_line
-  original: "001E D1             0029        MOV  M,E      INTO LINK"
-  corrected: "001F 73             0029        MOV  M,E      INTO LINK"
+  field: bytes
+  original: "D1"
+  corrected: "73"
   evidence: "MOV M,E encodes as 73, so the raw listing kept the previous POP D object byte on this line."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0021
   line_number: 30
   address: 0x001F
-  field: whole_line
-  original: "001F 73             0030        INX  H"
-  corrected: "0020 23             0030        INX  H"
+  field: bytes
+  original: "73"
+  corrected: "23"
   evidence: "The CONS store sequence is linear, and INX H must consume opcode 23 at the next address."
   basis: control-flow
   confidence: high
 - id: OCR-0022
   line_number: 31
   address: 0x0020
-  field: whole_line
-  original: "0020 23             0031        MOV  M,D"
-  corrected: "0021 72             0031        MOV  M,D"
+  field: bytes
+  original: "23"
+  corrected: "72"
   evidence: "MOV M,D encodes as 72 and belongs after the preceding INX H in the CONS writeback sequence."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0023
   line_number: 32
   address: 0x0021
-  field: whole_line
-  original: "0021 72             0032        INX  H"
-  corrected: "0022 23             0032        INX  H"
+  field: bytes
+  original: "72"
+  corrected: "23"
   evidence: "The second INX H in CONS reuses opcode 23, matching the repeated pointer-advance pattern."
   basis: duplicate-pattern
   confidence: high
 - id: OCR-0024
   line_number: 33
   address: 0x0022
-  field: whole_line
-  original: "0022 23             0033        POP  D       CDR VALUE"
-  corrected: "0023 D1             0033        POP  D       CDR VALUE"
+  field: bytes
+  original: "23"
+  corrected: "D1"
   evidence: "POP D encodes as D1 for the saved CDR value once the shifted line sequence is realigned."
   basis: instruction-encoding
   confidence: high
 - id: OCR-0025
   line_number: 34
   address: 0x0023
-  field: whole_line
-  original: "0023 D1             0034        MOV  M,E"
-  corrected: "0024 73             0034        MOV  M,E"
+  field: bytes
+  original: "D1"
+  corrected: "73"
   evidence: "MOV M,E encodes as 73, so the final displaced line in the CONS block must advance by one address."
   basis: instruction-encoding
   confidence: high

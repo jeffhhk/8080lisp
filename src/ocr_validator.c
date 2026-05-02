@@ -633,32 +633,15 @@ static int collect_discrepancies(const char *raw_text, const char *corrected_tex
       continue;
     }
 
-    if (raw_record.has_statement_line_number !=
-            corrected_record.has_statement_line_number ||
-        raw_record.statement_line_number != corrected_record.statement_line_number ||
-        raw_record.has_address != corrected_record.has_address ||
-        raw_record.address != corrected_record.address) {
-      if (!append_discrepancy(discrepancies, physical_line_number,
-                              raw_record.has_statement_line_number
-                                  ? raw_record.statement_line_number
-                                  : physical_line_number,
-                              raw_record.has_address, raw_record.address,
-                              OCR_FIELD_WHOLE_LINE, raw_trimmed,
-                              corrected_trimmed, error)) {
-        free(raw_copy);
-        free(corrected_copy);
-        return 0;
-      }
-      continue;
-    }
-
     i8080_format_listing_bytes(raw_bytes, sizeof(raw_bytes), raw_record.bytes,
                                raw_record.byte_count);
     i8080_format_listing_bytes(corrected_bytes, sizeof(corrected_bytes),
                                corrected_record.bytes,
                                corrected_record.byte_count);
     if (!add_field_discrepancy(discrepancies, physical_line_number,
-                               raw_record.statement_line_number,
+                               raw_record.has_statement_line_number
+                                   ? raw_record.statement_line_number
+                                   : physical_line_number,
                                raw_record.has_address, raw_record.address,
                                OCR_FIELD_BYTES, raw_bytes, corrected_bytes,
                                error) ||
