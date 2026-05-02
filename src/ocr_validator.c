@@ -32,15 +32,19 @@ typedef struct {
   int has_id;
   size_t line_number;
   int has_line_number;
+  size_t line_number_end;
+  int has_line_number_end;
   int has_address;
   uint16_t address;
+  uint16_t address_end;
+  int has_address_end;
   ocr_field field;
   int has_field;
-  char original[256];
+  char original[1024];
   int has_original;
-  char corrected[256];
+  char corrected[1024];
   int has_corrected;
-  char evidence[256];
+  char evidence[1024];
   int has_evidence;
   char basis[256];
   int has_basis;
@@ -338,6 +342,24 @@ static int finalize_provenance_entry(provenance_list *entries,
               "provenance entry is missing required fields");
     return 0;
   }
+  if (entry->has_line_number_end || entry->has_address_end) {
+    if (!entry->has_line_number_end || !entry->has_address_end) {
+      set_error(error, entry->ledger_line_number,
+                "block provenance entries need both end fields");
+      return 0;
+    }
+    if (entry->field != OCR_FIELD_BYTES) {
+      set_error(error, entry->ledger_line_number,
+                "only bytes entries may use block ranges");
+      return 0;
+    }
+    if (entry->line_number_end < entry->line_number ||
+        entry->address_end < entry->address) {
+      set_error(error, entry->ledger_line_number,
+                "block provenance range must not go backwards");
+      return 0;
+    }
+  }
   return append_provenance(entries, entry, error);
 }
 
@@ -412,6 +434,15 @@ static int parse_provenance_entries(const char *ledger_text,
       }
       current.line_number = parsed_number;
       current.has_line_number = 1;
+    } else if (strcmp(key, "line_number_end") == 0) {
+      if (!parse_number(value, &parsed_number)) {
+        set_error(error, ledger_line_number,
+                  "invalid provenance line_number_end");
+        free(content);
+        return 0;
+      }
+      current.line_number_end = parsed_number;
+      current.has_line_number_end = 1;
     } else if (strcmp(key, "address") == 0) {
       if (!parse_number(value, &parsed_number)) {
         set_error(error, ledger_line_number, "invalid provenance address");
@@ -420,6 +451,14 @@ static int parse_provenance_entries(const char *ledger_text,
       }
       current.address = parsed_number;
       current.has_address = 1;
+    } else if (strcmp(key, "address_end") == 0) {
+      if (!parse_number(value, &parsed_number)) {
+        set_error(error, ledger_line_number, "invalid provenance address_end");
+        free(content);
+        return 0;
+      }
+      current.address_end = parsed_number;
+      current.has_address_end = 1;
     } else if (strcmp(key, "field") == 0) {
       if (!parse_field_name(value, &current.field)) {
         set_error(error, ledger_line_number, "invalid provenance field");
@@ -460,6 +499,25 @@ static int parse_provenance_entries(const char *ledger_text,
   }
 
   free(content);
+  return 1;
+}
+
+static int append_joined_text(char *dst, size_t dst_size, const char *text) {
+  size_t current = strlen(dst);
+  size_t need = strlen(text);
+
+  if (current != 0) {
+    if (current + 3 >= dst_size) {
+      return 0;
+    }
+    memcpy(dst + current, " | ", 3);
+    current += 3;
+    dst[current] = '\0';
+  }
+  if (current + need >= dst_size) {
+    return 0;
+  }
+  memcpy(dst + current, text, need + 1);
   return 1;
 }
 
@@ -666,6 +724,72 @@ static int match_provenance_entries(discrepancy_list *discrepancies,
   for (i = 0; i < entries->count; ++i) {
     size_t j;
     discrepancy *match = NULL;
+    discrepancy *first = NULL;
+    discrepancy *last = NULL;
+    char joined_original[1024];
+    char joined_corrected[1024];
+
+    joined_original[0] = '\0';
+    joined_corrected[0] = '\0';
+
+    if (entries->items[i].has_line_number_end) {
+      for (j = 0; j < discrepancies->count; ++j) {
+        discrepancy *candidate = &discrepancies->items[j];
+        if (candidate->matched || candidate->field != OCR_FIELD_BYTES ||
+            !candidate->has_address) {
+          continue;
+        }
+        if (candidate->line_number < entries->items[i].line_number ||
+            candidate->line_number > entries->items[i].line_number_end ||
+            candidate->address < entries->items[i].address ||
+            candidate->address > entries->items[i].address_end) {
+          continue;
+        }
+        if (!append_joined_text(joined_original, sizeof(joined_original),
+                                candidate->original) ||
+            !append_joined_text(joined_corrected, sizeof(joined_corrected),
+                                candidate->corrected)) {
+          set_error(error, entries->items[i].ledger_line_number,
+                    "block provenance text is too long");
+          return 0;
+        }
+        if (first == NULL) {
+          first = candidate;
+        }
+        last = candidate;
+      }
+
+      if (first == NULL || last == NULL ||
+          first->line_number != entries->items[i].line_number ||
+          first->address != entries->items[i].address ||
+          last->line_number != entries->items[i].line_number_end ||
+          last->address != entries->items[i].address_end ||
+          strcmp(joined_original, entries->items[i].original) != 0 ||
+          strcmp(joined_corrected, entries->items[i].corrected) != 0) {
+        char message[160];
+        snprintf(message, sizeof(message),
+                 "stale provenance entry %s does not match a discrepancy block",
+                 entries->items[i].id);
+        set_error(error, entries->items[i].ledger_line_number, message);
+        return 0;
+      }
+
+      for (j = 0; j < discrepancies->count; ++j) {
+        discrepancy *candidate = &discrepancies->items[j];
+        if (candidate->matched || candidate->field != OCR_FIELD_BYTES ||
+            !candidate->has_address) {
+          continue;
+        }
+        if (candidate->line_number < entries->items[i].line_number ||
+            candidate->line_number > entries->items[i].line_number_end ||
+            candidate->address < entries->items[i].address ||
+            candidate->address > entries->items[i].address_end) {
+          continue;
+        }
+        candidate->matched = 1;
+      }
+      continue;
+    }
 
     for (j = 0; j < discrepancies->count; ++j) {
       discrepancy *candidate = &discrepancies->items[j];

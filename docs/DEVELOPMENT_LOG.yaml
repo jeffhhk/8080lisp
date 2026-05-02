@@ -299,3 +299,18 @@
       result: 20 tests 0 failures 0 skipped
     - verification: ./o/ocr_validator
       result: validated orig/lisp_8080_rawocr_2026-04-13.asm against src/lisp_8080_corrected.asm and docs/OCR_CORRECTIONS.yaml
+- meta: {_: bug, guid: b6r2}
+  title: OCR provenance should allow block entries for shifted byte-column runs
+  prompt: |
+    Add block-level OCR entries for shifted byte-column runs
+  verifications:
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 20 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/ocr_validator_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/ocr_validator_test.c and rerun make test
+      result: 20 tests 0 failures 0 skipped
+    - verification: ./o/ocr_validator
+      result: validated orig/lisp_8080_rawocr_2026-04-13.asm against src/lisp_8080_corrected.asm and docs/OCR_CORRECTIONS.yaml

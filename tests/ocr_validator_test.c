@@ -136,24 +136,32 @@ static void test_validator_ignores_address_only_change(void) {
              1);
 }
 
-static void test_validator_accepts_byte_change_when_address_changes(void) {
+static void test_validator_accepts_block_byte_run(void) {
   static const char *raw_text =
-      "0000 C3 B6 04       0011 CADDR  CALL CDR\n";
+      "0000 C3 B6 04       0011 CADDR  CALL CDR\n"
+      "0003 CD 10 00       0012 CADR   CALL CDR\n"
+      "0006 CD 10 00       0013 CAR    PUSH PSW\n"
+      "0009 F5             0014 CAR2   MOV  A,M\n";
   static const char *corrected_text =
-      "0003 CD 10 00       0011 CADDR  CALL CDR\n";
+      "0003 CD 10 00       0011 CADDR  CALL CDR\n"
+      "0006 CD 10 00       0012 CADR   CALL CDR\n"
+      "0009 F5             0013 CAR    PUSH PSW\n"
+      "000A 7E             0014 CAR2   MOV  A,M\n";
   static const char *ledger_text =
       "- id: OCR-0006\n"
       "  line_number: 11\n"
+      "  line_number_end: 14\n"
       "  address: 0x0000\n"
+      "  address_end: 0x0009\n"
       "  field: bytes\n"
-      "  original: C3 B6 04\n"
-      "  corrected: CD 10 00\n"
-      "  evidence: shifted OCR block changed the machine code associated with this source line\n"
+      "  original: \"C3 B6 04 | CD 10 00 | F5\"\n"
+      "  corrected: \"CD 10 00 | F5 | 7E\"\n"
+      "  evidence: shifted OCR block changed the machine code associated with these source lines\n"
       "  basis: duplicate-pattern\n"
       "  confidence: high\n";
   ocr_validator_error error;
 
-  expect_int("byte change with address change validates",
+  expect_int("block byte run validates",
              ocr_validate_texts("raw", raw_text, "corrected", corrected_text,
                                 "ledger", ledger_text, &error),
              1);
@@ -198,7 +206,7 @@ int main(void) {
   test_validator_rejects_stale_provenance_entry();
   test_validator_rejects_invalid_basis_value();
   test_validator_ignores_address_only_change();
-  test_validator_accepts_byte_change_when_address_changes();
+  test_validator_accepts_block_byte_run();
   test_validator_accepts_bytes_only_to_blank_discrepancy();
   test_validator_accepts_repository_placeholder_files();
 

@@ -55,6 +55,9 @@ This manual reflects the behavior validated by the current `make test` fixture.
   `operand`, `comment`, and `whole_line`.
 - Address-only line moves do not require provenance entries; a discrepancy is
   recorded only when the machine code or assembly text for the line changes.
+- A `bytes` provenance entry may cover a shifted byte-column run by adding
+  `line_number_end` and `address_end`, which lets one ledger item account for
+  the concatenated byte discrepancies across that block.
 - Provenance `basis` values are restricted to `instruction-encoding`,
   `cross-reference`, `control-flow`, `duplicate-pattern`, `runtime-behavior`,
   and `scan-review`.
