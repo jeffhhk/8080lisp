@@ -595,3 +595,18 @@
       result: confirmed the generated page contains the textarea UI, embeds the corrected Lisp listing, and does not rely on an external script asset or ship `src/i8080_asm.c`
     - verification: ./ensure_emsdk_uninstalled.sh /tmp/8080lisp-emsdk-check
       result: removed the temporary emsdk checkout after the web build verification
+- meta: {_: bug, guid: y4p6}
+  title: i8080web should keep browser emulator state off the wasm stack
+  prompt: |
+    Please fix:
+    Loading o/i8080web.html in firefox and clicking "Run Monitor Input" shows in the console:
+        Uncaught RuntimeError: index out of bounds
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: rebuilt the native gcc tools successfully after moving browser-only emulator state out of the call stack
+    - verification: make test
+      result: 30 tests 0 failures 0 skipped
+    - verification: EMSDK_VERSION=latest ./ensure_emsdk_installed.sh /tmp/8080lisp-emsdk-fix && EMSDK_DIR=/tmp/8080lisp-emsdk-fix EMSDK_VERSION=latest make i8080web && ./ensure_emsdk_uninstalled.sh /tmp/8080lisp-emsdk-fix
+      result: installed a temporary emsdk checkout, rebuilt `o/i8080web.html` with the stack fix in place, and removed the temporary checkout afterward

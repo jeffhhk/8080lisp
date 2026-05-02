@@ -217,3 +217,22 @@
     - file: ensure_emsdk_installed.sh
     - file: ensure_emsdk_uninstalled.sh
     - file: tests/i8080_web_test.c
+
+- meta: {_: bug, id: PORT-0002P, status: done, priority: high, guid: p6y4}
+  title: i8080web should not trap on Firefox monitor runs
+  expected_behavior: |
+    Clicking the browser monitor run button in `o/i8080web.html` should execute
+    the embedded Lisp monitor without triggering a WebAssembly out-of-bounds
+    trap.
+  evidence:
+    - evidence: "Running `i8080web_eval` from Firefox produced `Uncaught RuntimeError: index out of bounds` when the page's `Run Monitor Input` button called into wasm."
+    - evidence: "The browser entrypoint in `src/i8080_web_app.c` had placed an `i8080_image` and `i8080_cpu` on the call stack, which is substantially smaller under wasm than under the native test harness."
+    - evidence: "Moving the browser state to static storage preserved native `make test` results and the Emscripten `make i8080web` build."
+  acceptance:
+    - acceptance: Keep the browser evaluator's large state off the WebAssembly stack.
+    - acceptance: Preserve the existing native test suite behavior.
+    - acceptance: Rebuild the optional `i8080web` artifact successfully after the fix.
+  related:
+    - file: src/i8080_web_app.c
+    - file: tests/i8080_web_test.c
+    - task: PORT-0002O

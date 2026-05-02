@@ -26,6 +26,17 @@ typedef struct {
   size_t output_len;
 } i8080web_session;
 
+typedef struct {
+  i8080_asm_error error;
+  i8080_image image;
+  i8080_cpu cpu;
+  i8080web_session session;
+} i8080web_state;
+
+/* Keep the large emulator state off the wasm stack so browser calls do not
+ * fault on the much smaller default WebAssembly stack. */
+static i8080web_state i8080web;
+
 static void output_append_text(i8080web_session *session, const char *text) {
   size_t available;
   size_t text_len;
@@ -125,49 +136,50 @@ static void host_abend(void *ctx, uint8_t code) {
 }
 
 EMSCRIPTEN_KEEPALIVE const char *i8080web_eval(const char *input) {
-  i8080_asm_error error;
-  i8080_image image;
-  i8080_cpu cpu;
-  static i8080web_session session;
+  i8080web_session *session = &i8080web.session;
   i8080_hooks hooks = {
       .inch = host_inch,
       .outc = host_outc,
       .abend = host_abend,
-      .ctx = &session,
+      .ctx = session,
   };
   int run_result;
 
-  memset(&session, 0, sizeof(session));
-  session.cpu = &cpu;
-  session.input = (const unsigned char *)(input != NULL ? input : "");
+  memset(&i8080web, 0, sizeof(i8080web));
+  session->cpu = &i8080web.cpu;
+  session->input = (const unsigned char *)(input != NULL ? input : "");
 
   if (!i8080_assemble_text("src/lisp_8080_corrected.asm",
-                           i8080web_embedded_program, &image, &error)) {
-    if (error.line_number != 0) {
-      output_append_format(&session, "src/lisp_8080_corrected.asm:%zu: %s\n",
-                           error.line_number, error.message);
+                           i8080web_embedded_program, &i8080web.image,
+                           &i8080web.error)) {
+    if (i8080web.error.line_number != 0) {
+      output_append_format(session, "src/lisp_8080_corrected.asm:%zu: %s\n",
+                           i8080web.error.line_number,
+                           i8080web.error.message);
     } else {
-      output_append_format(&session, "%s\n", error.message);
+      output_append_format(session, "%s\n", i8080web.error.message);
     }
-    return session.output;
+    return session->output;
   }
 
-  i8080_init(&cpu, &hooks);
-  i8080_load_image(&cpu, &image);
-  run_result = i8080_run(&cpu, 10000000);
+  i8080_init(&i8080web.cpu, &hooks);
+  i8080_load_image(&i8080web.cpu, &i8080web.image);
+  run_result = i8080_run(&i8080web.cpu, 10000000);
 
   if (run_result == I8080_STEP_LIMIT) {
-    output_append_format(&session, "\nstep limit reached after %zu steps\n",
-                         cpu.steps);
-    return session.output;
+    output_append_format(session, "\nstep limit reached after %zu steps\n",
+                         i8080web.cpu.steps);
+    return session->output;
   }
-  if (cpu.error) {
-    output_append_format(&session, "\nunsupported opcode 0x%02x at 0x%04x\n",
-                         cpu.error_opcode, (uint16_t)(cpu.pc - 1));
-    return session.output;
+  if (i8080web.cpu.error) {
+    output_append_format(session, "\nunsupported opcode 0x%02x at 0x%04x\n",
+                         i8080web.cpu.error_opcode,
+                         (uint16_t)(i8080web.cpu.pc - 1));
+    return session->output;
   }
-  if (cpu.abended) {
-    output_append_format(&session, "\nABEND 0x%02x\n", cpu.abend_code);
+  if (i8080web.cpu.abended) {
+    output_append_format(session, "\nABEND 0x%02x\n",
+                         i8080web.cpu.abend_code);
   }
-  return session.output;
+  return session->output;
 }
