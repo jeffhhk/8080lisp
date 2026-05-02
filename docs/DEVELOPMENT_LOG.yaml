@@ -644,3 +644,20 @@
       result: 34 tests 0 failures 0 skipped
     - verification: make package-web
       result: rebuilt o/i8080web.html with `eval` and `Restart` controls plus the exported `i8080web_restart` entrypoint
+- meta: {_: feature, guid: f4p2}
+  title: Deploy the packaged web monitor to GitHub Pages from CI
+  prompt: |
+    Apply these instructions:
+        https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
+    so that when I push to main, the generated o/i8080web.html becomes my project's pages' index.html.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: rebuilt o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 34 tests 0 failures 0 skipped
+    - verification: make package-web
+      result: rebuilt o/i8080web.html successfully for the same artifact path the Pages workflow stages as `index.html`
+    - verification: sed -n '1,220p' .github/workflows/pages.yml
+      result: confirmed the workflow triggers on pushes to `main`, runs `make package-web`, stages `github-pages-site/index.html`, uploads the Pages artifact, and deploys it

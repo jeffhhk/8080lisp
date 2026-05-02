@@ -5,6 +5,7 @@
 - `make test` builds and runs the default local `gcc` target
 - `make build-cosmo` runs `make clean` and then rebuilds the shared `build` target with `CC=x86_64-unknown-cosmo-cc`, `BINEXT=.com`, and `PATH` augmented by `$(HOME)/bin/cosmo/bin`
 - `make i8080web` optionally installs an embedded emsdk checkout and emits a standalone `o/i8080web.html` page for the corrected Lisp monitor
+- pushing to `main` runs `.github/workflows/pages.yml`, which builds `o/i8080web.html`, stages it as `index.html`, and deploys it to GitHub Pages
 
 The local `gcc` path keeps the existing Linux-native output names under `o/`.
 The Cosmopolitan path emits cross-platform `.com` binaries under `o/`:
@@ -63,3 +64,7 @@ browser without shipping a separate assembler executable or auxiliary assets.
 [dir]` removes that checkout when it is no longer needed. `make i8080web`
 respects `EMSDK_DIR` and `EMSDK_VERSION` overrides when invoking the install
 script and `emcc`.
+
+To activate the workflow-backed site, set the repository's GitHub Pages source
+to `GitHub Actions` in the repository Pages settings. The workflow publishes the
+generated artifact from CI; it does not require committing `o/i8080web.html`.

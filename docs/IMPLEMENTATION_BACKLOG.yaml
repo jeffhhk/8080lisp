@@ -263,3 +263,20 @@
     - file: web/i8080web_shell.html
     - file: tests/i8080_web_test.c
     - file: docs/Reference.md
+
+- meta: {_: feature, id: PORT-0002R, status: done, priority: medium, guid: r8s2}
+  title: Deploy the packaged web monitor to GitHub Pages from CI
+  expected_behavior: |
+    Pushing to `main` should trigger a GitHub Actions workflow that builds the
+    packaged browser monitor, stages it as the site's `index.html`, and deploys
+    that generated artifact to GitHub Pages without checking the HTML output
+    into the repository.
+  evidence:
+    - evidence: "`.github/workflows/pages.yml` now follows the GitHub Pages custom-workflow pattern with `configure-pages`, `upload-pages-artifact`, and `deploy-pages`, triggered by pushes to `main`."
+    - evidence: "The workflow runs `make package-web`, then copies `o/i8080web.html` to `github-pages-site/index.html` before uploading the Pages artifact."
+    - evidence: "`docs/BUILD.md` now documents that Pages must use the `GitHub Actions` source and that the deployed HTML is generated in CI rather than committed."
+  related:
+    - task: PORT-0002O
+    - task: PORT-0002Q
+    - file: .github/workflows/pages.yml
+    - file: docs/BUILD.md
