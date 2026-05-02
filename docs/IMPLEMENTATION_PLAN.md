@@ -86,6 +86,7 @@ comment, but no original comment text may be dropped.
 ## Change constraints
 
 - Before commit, validate the size of the program with "size --format=GNU --radix=10", and record the result in DEVELOPMENT_LOG.yaml as a verification.
+- Update documentation according to Documentation Strategy
 
 ## Testing Strategy
 
@@ -94,3 +95,7 @@ The normative policy for this repository is:
 - `make test` is the primary automated verification gate
 - test every path in the original code unless it would involve adding parameters or entry points.
 - when a test is significantly changed, follow the Test Double Check Procedure end-to-end before final delivery
+
+## Documentation Strategy
+
+Synthesize a reference manual docs/Reference.md from the behavior that you validate using your tests.
