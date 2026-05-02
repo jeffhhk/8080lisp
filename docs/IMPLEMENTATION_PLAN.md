@@ -13,13 +13,14 @@ orig/lisp_8080_rawocr_2026-04-13.asm
 - `make clean`
 - `make build` for the local `gcc` validation target
 - `make test` for the local `gcc` validation target
-- `make lisp-cosmo` for the separate `cosmocc` target (manual run only)
-    - replaces `gcc` with `cosmocc` for the cosmopolitan target
+- `make build-cosmo` for the separate `cosmocc` build (manual run only)
+    - runs `make clean` and then recurses through the shared `build` target with `CC=x86_64-unknown-cosmo-cc`
 
 ## Implementation rules
 
 - Keep the local validation path separate from the `gcc` build path
 - Use `gcc` for the default local validation target
+- Use recursive make with variable overrides for the `cosmocc` build path
 - Test fixture must test every LISP primitive at least once
 - Test fixtures are free to use C
 
@@ -121,7 +122,6 @@ For docs/Reference.md, use the following template, with style guidelines marked 
         src/lisp_8080_corrected.asm
 
     <Describe the makefile tasks related to the coverage report, and how it gets updated.>
-
 
 
 

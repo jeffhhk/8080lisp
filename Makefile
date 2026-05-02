@@ -1,7 +1,6 @@
-COSMOCC := $(HOME)/bin/cosmo/bin/cosmocc
-CC := gcc
-CFLAGS := -O2 -Wall -Wextra -std=c11 -Isrc -Itests
-BUILD_DIR := o
+CC = gcc
+CFLAGS = -O2 -Wall -Wextra -std=c11 -Isrc -Itests
+BUILD_DIR = o
 LISTING_SRCS := src/i8080_listing.c
 SOURCE_DISPLAY_SRCS := src/i8080_coverage_source_display.c
 RUNTIME_SRCS := src/lisp_runtime.S
@@ -27,9 +26,8 @@ I8080_EMU_TEST := $(BUILD_DIR)/i8080_emu_test
 LISP_INTERPRETER_TEST := $(BUILD_DIR)/lisp_interpreter_test
 OCR_VALIDATOR := $(BUILD_DIR)/ocr_validator
 OCR_VALIDATOR_TEST := $(BUILD_DIR)/ocr_validator_test
-LISP_COSMO := $(BUILD_DIR)/lisp_cosmo.com
 
-.PHONY: clean build test lisp-gcc lisp-test lisp-cosmo i8080asm i8080emu ocr-validator
+.PHONY: clean build build-cosmo test lisp-gcc lisp-test i8080asm i8080emu ocr-validator
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -64,9 +62,6 @@ $(OCR_VALIDATOR): $(OCR_VALIDATOR_SRCS) $(OCR_VALIDATOR_MAIN_SRC) | $(BUILD_DIR)
 $(OCR_VALIDATOR_TEST): $(OCR_VALIDATOR_SRCS) $(OCR_VALIDATOR_TEST_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ $(OCR_VALIDATOR_SRCS) $(OCR_VALIDATOR_TEST_SRC)
 
-$(LISP_COSMO): $(RUNTIME_SRCS) $(HOST_IO_SRCS) $(MAIN_SRC) | $(BUILD_DIR)
-	$(COSMOCC) -O2 -Wall -Wextra -Isrc -Itests -o $@ $(RUNTIME_SRCS) $(HOST_IO_SRCS) $(MAIN_SRC)
-
 lisp-gcc: $(LISP_GCC)
 
 lisp-test: $(LISP_TEST)
@@ -77,9 +72,11 @@ i8080emu: $(I8080_EMU)
 
 ocr-validator: $(OCR_VALIDATOR)
 
-lisp-cosmo: $(LISP_COSMO)
-
 build: lisp-gcc i8080asm i8080emu ocr-validator
+
+build-cosmo:
+	$(MAKE) clean
+	env PATH="$$PATH:$(HOME)/bin/cosmo/bin" $(MAKE) build CC=x86_64-unknown-cosmo-cc
 
 test: lisp-test $(I8080_EMU) $(I8080_ASM_TEST) $(I8080_EMU_TEST) $(LISP_INTERPRETER_TEST) $(OCR_VALIDATOR_TEST)
 	./$(LISP_TEST)

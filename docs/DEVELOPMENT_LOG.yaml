@@ -521,3 +521,25 @@
       result: 26 tests 0 failures 0 skipped
     - verification: printf 'NULL (NIL) \n' | ./o/i8080emu --coverage-source-display-on-exit src/lisp_8080_corrected.asm | sed -n '1,12p'
       result: printed source coverage lines that begin with hit totals and source text, without a leading source line number column
+- meta: {_: refactor, guid: b4k2}
+  title: Route cosmocc builds through the shared recursive build target
+  prompt: |
+    Refactor the Makefile so that one "build-cosmo" target builds the whole project under cosmocc.
+
+    Use the "Recursive make with variable overrides" style.
+    Invoke "make clean" before recursing to build.
+    To keep it simple, reuse all target names between cosmo and noncosmo.
+    Use the x86_64-unknown-cosmo-cc compiler so that you can assemble lisp_runtime.S.
+    If needed, augment the path with the cosmocc directory:
+        env PATH=$PATH:$HOME/bin/cosmo/bin
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 26 tests 0 failures 0 skipped
+    - verification: PATH="$PATH:$HOME/bin/cosmo/bin" command -v x86_64-unknown-cosmo-cc
+      result: resolved /home/jeff/bin/cosmo/bin/x86_64-unknown-cosmo-cc
+    - verification: make build-cosmo
+      result: ran make clean and rebuilt o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with x86_64-unknown-cosmo-cc

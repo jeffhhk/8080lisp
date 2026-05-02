@@ -3,7 +3,7 @@
 - `make clean` removes build output under `o/`
 - `make build` builds the default local `gcc` target plus the local `i8080asm`, `i8080emu`, and `ocr_validator` tools
 - `make test` builds and runs the default local `gcc` target
-- `make lisp-cosmo` builds the separate `cosmocc` target
+- `make build-cosmo` runs `make clean` and then rebuilds the shared `build` target with `CC=x86_64-unknown-cosmo-cc` and `PATH` augmented by `$(HOME)/bin/cosmo/bin`
 
 The translated Lisp runtime lives under `src/`. C-based host shims, the local
 entrypoint, and the automated fixture live under `tests/`.
