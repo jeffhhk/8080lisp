@@ -85,3 +85,43 @@ The normative policy for this repository is:
 ## Documentation Strategy
 
 Synthesize a reference manual docs/Reference.md from the behavior that you validate using your tests.
+
+For docs/Reference.md, use the following template, with style guidelines marked in <>:
+
+    # Synopsis
+
+    A brief description of all the confirmed capabiliites of the 8080 lisp interpreter and the 8080 emulator.
+
+    ## Lisp Interpreter
+
+    <Organize LISP forms and definitions by category primarily by increasing complexity, and secondarily by category.>
+
+    ## Emulator
+
+    ### Supported instructions
+
+    <Format as a table>
+
+    ### Usage
+
+    <Format as a man page>
+
+    ## Assembler
+
+    <Note any differences in instruction support compared to the emulator>
+
+    <Format as a man page>
+
+    ## OCR Validator and validation process
+
+    Provenance of the documents are as follows.  This is a RAW OCR of the original article listing:
+        orig/lisp_8080_rawocr_2026-04-13.asm
+
+    This file has minimal corrections required to run:
+        src/lisp_8080_corrected.asm
+
+    <Describe the makefile tasks related to the coverage report, and how it gets updated.>
+
+
+
+
