@@ -14,3 +14,11 @@ This manual reflects the behavior validated by the current `make test` fixture.
 - `lisp_inch` returns the next input byte and maps end of input to `0x00`.
 - `lisp_outc` emits one byte through the host output hook.
 - `lisp_crlf` emits a line feed byte.
+
+## Assembler
+
+- `o/i8080asm` can ingest the OCR listing in `orig/lisp_8080_rawocr_2026-04-13.asm`
+  by reconstructing the binary from the listing's address and object-byte columns.
+- The same assembler also accepts a small clean-source subset used by the local
+  tests: `ORG`, `EQU`, `DB`, `DW`, `DS`, labels, and the 8080 opcodes exercised
+  by the new fixture.

@@ -66,3 +66,21 @@
       result: emitted /home/jeff/bin/cosmo/bin/cosmocc -O2 -Wall -Wextra -Isrc -Itests -o o/lisp_cosmo.com src/lisp_runtime.S tests/lisp_host_io.c tests/lisp_main.c
     - verification: size --format=GNU --radix=10 o/lisp_gcc
       result: text=934 data=1968 bss=69712 total=72614
+- meta: {_: feature, guid: a4k7}
+  title: Add an 8080 assembler that ingests the OCR listing
+  prompt: |
+    Make me a 8080 emulator.
+    Patch the INCH and COUT functions to the host machine so we can see what's going on.
+    Make a matching assembler.
+    Both the emulator and assembler should be capable of ingesting orig/lisp_8080_rawocr_2026-04-13.asm.
+  verifications:
+    - verification: make build
+      result: built o/lisp_gcc and o/i8080asm with gcc
+    - verification: make test
+      result: 4 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/i8080_asm_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/i8080_asm_test.c and rerun make test
+      result: 4 tests 0 failures 0 skipped
+    - verification: ./o/i8080asm orig/lisp_8080_rawocr_2026-04-13.asm /tmp/lisp.bin && wc -c /tmp/lisp.bin
+      result: emitted a 1759-byte flat binary from the OCR listing

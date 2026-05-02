@@ -1,0 +1,2 @@
+- [x] PORT-0002A: add an 8080 assembler that can ingest `orig/lisp_8080_rawocr_2026-04-13.asm`
+- [ ] PORT-0002B: add an 8080 emulator with host monitor hooks and end-to-end Lisp validation
