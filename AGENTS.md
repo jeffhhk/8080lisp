@@ -1,9 +1,11 @@
 # Global information
 The current product goal and requirements are held in docs/IMPLEMENTATION_PLAN.md
 
+A request may contain more than one change.
+
 ## Change constraints
 These apply to every change.
-- Every change has a commit
+- Every change has at least one commit.
 - One purpose per change
 - Repository must remain buildable
 - Take reasonable precautions to avoid duplicating code which could be reused.  Do not repeat yourself.  (DRY)
