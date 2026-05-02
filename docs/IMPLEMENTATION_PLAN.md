@@ -21,7 +21,7 @@ Port the 8080 lisp implementation to a cosmopolitan binary.
 - Test fixture must test every LISP primitive at least once
 - Test fixtures are free to use C
 
-### Register equivalence
+### Architecture mapping
 
 Use the following register map to translate from 8080 to 8086 registers.
 
@@ -32,14 +32,24 @@ Use the following register map to translate from 8080 to 8086 registers.
 | C                | BC (low)             | BL → BX           |                                        |
 | D                | DE (high)            | DH → DX           | Forms DX with E                        |
 | E                | DE (low)             | DL → DX           |                                        |
-| H                | HL (high)            | (no exact)        | Often maps to BX/SI depending on usage |
-| L                | HL (low)             | (no exact)        | Same as above                          |
+| H                | HL (high)            | (no exact)        | SI                                     |
 | BC               | Register pair        | BX                | General-purpose                        |
 | DE               | Register pair        | DX                | Often used for I/O                     |
-| HL               | Memory pointer       | BX / SI / DI      | Depends on addressing mode             |
 | SP               | Stack Pointer        | SP                | Same role, wider                       |
 | PC               | Program Counter      | IP                | Same concept                           |
 | F                | Flags                | FLAGS             | 8086 has more flags                    |
+
+### Instruction mapping
+
+Take advantage of overlapping routines, e.g.:
+    0000 C3 B6 04       0011 CADDR  CALL CDR
+    0003 CD 10 00       0012 CADR   CALL CDR
+
+Preserve label names when possible, e.g. CDR:
+    000F C9             0020 CDR    PUSH PSW
+
+Preserve comments, e.g. "MONITOR REENTRY":
+    EQU 0F000H  MONITOR REENTRY
 
 ## Change constraints
 
