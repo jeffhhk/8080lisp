@@ -9,6 +9,7 @@ enum { I8080_IMAGE_SIZE = 65536 };
 typedef struct {
   uint8_t bytes[I8080_IMAGE_SIZE];
   uint8_t used[I8080_IMAGE_SIZE];
+  size_t source_lines[I8080_IMAGE_SIZE];
   uint16_t origin;
   uint16_t limit;
 } i8080_image;

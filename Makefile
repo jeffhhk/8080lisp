@@ -3,8 +3,9 @@ CC := gcc
 CFLAGS := -O2 -Wall -Wextra -std=c11 -Isrc -Itests
 BUILD_DIR := o
 LISTING_SRCS := src/i8080_listing.c
+SOURCE_DISPLAY_SRCS := src/i8080_coverage_source_display.c
 RUNTIME_SRCS := src/lisp_runtime.S
-ASM_SRCS := src/i8080_asm.c $(LISTING_SRCS)
+ASM_SRCS := src/i8080_asm.c $(LISTING_SRCS) $(SOURCE_DISPLAY_SRCS)
 EMU_SRCS := src/i8080_emu.c
 OCR_VALIDATOR_SRCS := src/ocr_validator.c $(LISTING_SRCS)
 HOST_IO_SRCS := tests/lisp_host_io.c

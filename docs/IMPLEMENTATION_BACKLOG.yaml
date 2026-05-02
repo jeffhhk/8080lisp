@@ -112,3 +112,18 @@
   related:
     - file: src/i8080emu_main.c
     - file: tests/i8080_emu_test.c
+
+- meta: {_: feature, id: PORT-0002J, status: done, priority: medium, guid: j8w2}
+  title: Add a coverage-backed source display mode to the emulator CLI
+  expected_behavior: |
+    The emulator CLI should be able to print a compressed source view that shows
+    only covered program lines, along with their hit counts, after execution.
+  evidence:
+    - evidence: `o/i8080emu` now accepts `--coverage-source-display-on-exit` and emits a newline-prefixed `source coverage:` report after program output.
+    - evidence: `src/i8080_asm.c` tracks source-line ownership for assembled bytes so runtime coverage can be aggregated back to source lines.
+    - evidence: `tests/i8080_emu_test.c` validates the newline separator, covered-line rendering, and `...` compression on uncovered gaps.
+  related:
+    - file: src/i8080_asm.c
+    - file: src/i8080_coverage_source_display.c
+    - file: src/i8080emu_main.c
+    - file: tests/i8080_emu_test.c

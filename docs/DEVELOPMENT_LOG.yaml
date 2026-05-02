@@ -417,3 +417,28 @@
       result: printed >>T without ABEND
     - verification: printf 'NULL ((NIL)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
       result: printed >>F without ABEND
+- meta: {_: feature, guid: s4k8}
+  title: Add compressed covered-source display to the emulator CLI
+  prompt: |
+    Write a source displayer for coverage report information and an assembled 8080 program.
+    Display only the lines that got coverage, and "..." to compress all the lines in between.
+    When the following command line flag is passed:
+
+        printf 'NULL (NIL) \n' | ./o/i8080emu --coverage-source-display-on-exit src/lisp_8080_corrected.asm
+
+    - Collect a coverage report.
+    - On exit, invoke the source displayer with the coverage.
+    - Preface the source display with a newline to separate the evaluation response from the coverage report.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 24 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/i8080_emu_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/i8080_emu_test.c and rerun make test
+      result: 24 tests 0 failures 0 skipped
+    - verification: printf 'NULL (NIL) \n' | ./o/i8080emu --coverage-source-display-on-exit src/lisp_8080_corrected.asm
+      result: printed >>T, then a separating newline, then a compressed source coverage report with covered lines and ellipsis gaps

@@ -149,6 +149,16 @@ static void expect_contains(const char *label, const char *actual,
   failures += 1;
 }
 
+static void expect_not_contains(const char *label, const char *actual,
+                                const char *unexpected) {
+  if (strstr(actual, unexpected) == NULL) {
+    return;
+  }
+  fprintf(stderr, "%s: did not expect to find \"%s\" in \"%s\"\n", label,
+          unexpected, actual);
+  failures += 1;
+}
+
 static int read_file_text(const char *path, char *buffer, size_t size) {
   FILE *stream = fopen(path, "r");
   size_t read_len;
@@ -170,6 +180,19 @@ static int read_file_text(const char *path, char *buffer, size_t size) {
   return 1;
 }
 
+static int write_file_text(const char *path, const char *text) {
+  FILE *stream = fopen(path, "w");
+
+  if (stream == NULL) {
+    fprintf(stderr, "write %s failed\n", path);
+    failures += 1;
+    return 0;
+  }
+  fputs(text, stream);
+  fclose(stream);
+  return 1;
+}
+
 static void test_cli_writes_coverage_ndjson(void) {
   static const char *program =
       "ORG 0000H\n"
@@ -181,7 +204,6 @@ static void test_cli_writes_coverage_ndjson(void) {
   char coverage_path[128];
   char command[320];
   char coverage_text[1024];
-  FILE *stream;
   int status;
 
   snprintf(asm_path, sizeof(asm_path), "/tmp/i8080_coverage_%ld.asm",
@@ -189,14 +211,9 @@ static void test_cli_writes_coverage_ndjson(void) {
   snprintf(coverage_path, sizeof(coverage_path), "/tmp/i8080_coverage_%ld.ndjson",
            (long)getpid());
 
-  stream = fopen(asm_path, "w");
-  if (stream == NULL) {
-    fprintf(stderr, "write %s failed\n", asm_path);
-    failures += 1;
+  if (!write_file_text(asm_path, program)) {
     return;
   }
-  fputs(program, stream);
-  fclose(stream);
 
   snprintf(command, sizeof(command), "./o/i8080emu --coverage-out %s %s",
            coverage_path, asm_path);
@@ -226,6 +243,63 @@ static void test_cli_writes_coverage_ndjson(void) {
                   "{\"kind\":\"address\",\"address\":6,\"address_hex\":\"0x0006\",\"hits\":1}");
   expect_contains("coverage-out summary", coverage_text,
                   "{\"kind\":\"summary\",\"covered_addresses\":4,\"total_instruction_fetches\":8}");
+}
+
+static void test_cli_displays_compressed_covered_source_on_exit(void) {
+  static const char *program =
+      "ORG 0000H\n"
+      "MVI A,'A'\n"
+      "CALL 0F009H\n"
+      "JMP DONE\n"
+      "MVI A,'B'\n"
+      "DONE: HLT\n";
+  char asm_path[128];
+  char output_path[128];
+  char command[320];
+  char output_text[2048];
+  int status;
+
+  snprintf(asm_path, sizeof(asm_path), "/tmp/i8080_covsrc_%ld.asm",
+           (long)getpid());
+  snprintf(output_path, sizeof(output_path), "/tmp/i8080_covsrc_%ld.txt",
+           (long)getpid());
+
+  if (!write_file_text(asm_path, program)) {
+    return;
+  }
+
+  snprintf(command, sizeof(command),
+           "./o/i8080emu --coverage-source-display-on-exit %s > %s",
+           asm_path, output_path);
+  status = system(command);
+  if (status == -1) {
+    fprintf(stderr, "coverage-source-display command failed to launch\n");
+    failures += 1;
+    return;
+  }
+  if (!WIFEXITED(status)) {
+    fprintf(stderr, "coverage-source-display command did not exit cleanly\n");
+    failures += 1;
+    return;
+  }
+  expect_int("coverage-source-display command exited", WEXITSTATUS(status), 0);
+  if (!read_file_text(output_path, output_text, sizeof(output_text))) {
+    return;
+  }
+
+  expect_contains("coverage-source-display output prefix", output_text,
+                  "A\nsource coverage:\n");
+  expect_contains("coverage-source-display line 2", output_text,
+                  "| MVI A,'A'\n");
+  expect_contains("coverage-source-display line 3", output_text,
+                  "| CALL 0F009H\n");
+  expect_contains("coverage-source-display line 4", output_text,
+                  "| JMP DONE\n");
+  expect_contains("coverage-source-display ellipsis", output_text, "...\n");
+  expect_contains("coverage-source-display line 6", output_text,
+                  "| DONE: HLT\n");
+  expect_not_contains("coverage-source-display skipped line", output_text,
+                      "| MVI A,'B'\n");
 }
 
 static void test_cli_evaluates_identity_lambda_of_three_from_stdin(void) {
@@ -291,14 +365,15 @@ int main(void) {
   test_instruction_pointer_coverage_counts_executed_addresses();
   test_original_image_boots_to_the_monitor_loop();
   test_cli_writes_coverage_ndjson();
+  test_cli_displays_compressed_covered_source_on_exit();
   test_cli_evaluates_identity_lambda_of_three_from_stdin();
   test_cli_null_queries_print_boolean_results();
 
   if (failures != 0) {
-    fprintf(stderr, "6 tests %d failures 0 skipped\n", failures);
+    fprintf(stderr, "7 tests %d failures 0 skipped\n", failures);
     return 1;
   }
 
-  puts("6 tests 0 failures 0 skipped");
+  puts("7 tests 0 failures 0 skipped");
   return 0;
 }

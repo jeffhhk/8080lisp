@@ -20,7 +20,10 @@ instruction address with its hit count, followed by summary totals. Pass
 `--coverage-out path` before the assembly path to write the same run's coverage
 to an NDJSON file. Each nonzero address is written as one `address` record, and
 the file ends with one `summary` record. `--coverage` and `--coverage-out` may
-be used together.
+be used together. Pass `--coverage-source-display-on-exit` before the assembly
+path to print a newline-prefixed `source coverage:` report to stdout after the
+program output; the report shows only covered source lines with per-line hit
+totals and inserts `...` between non-adjacent covered lines.
 
 The OCR validator binary is written to `o/ocr_validator`. With no arguments it
 validates `orig/lisp_8080_rawocr_2026-04-13.asm`,

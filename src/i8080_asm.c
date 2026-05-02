@@ -301,9 +301,11 @@ static int rp_code(const char *name, int allow_psw) {
   return -1;
 }
 
-static void write_byte(i8080_image *image, uint16_t address, uint8_t value) {
+static void write_byte(i8080_image *image, uint16_t address, uint8_t value,
+                       size_t source_line) {
   image->bytes[address] = value;
   image->used[address] = 1;
+  image->source_lines[address] = source_line;
   if (address < image->origin || image->limit == 0) {
     image->origin = address;
   }
@@ -312,9 +314,11 @@ static void write_byte(i8080_image *image, uint16_t address, uint8_t value) {
   }
 }
 
-static void write_word(i8080_image *image, uint16_t address, uint16_t value) {
-  write_byte(image, address, (uint8_t)(value & 0xff));
-  write_byte(image, (uint16_t)(address + 1), (uint8_t)(value >> 8));
+static void write_word(i8080_image *image, uint16_t address, uint16_t value,
+                       size_t source_line) {
+  write_byte(image, address, (uint8_t)(value & 0xff), source_line);
+  write_byte(image, (uint16_t)(address + 1), (uint8_t)(value >> 8),
+             source_line);
 }
 
 static int parse_operands(const char *text, char operands[][64], int max_ops) {
@@ -401,7 +405,7 @@ static int encode_instruction(const assembler *state, const char *opcode,
     if (pass == 2) {
       uint16_t addr;
       for (addr = pc; addr < (uint16_t)(pc + value); ++addr) {
-        write_byte(image, addr, 0x00);
+        write_byte(image, addr, 0x00, state->line_number);
       }
     }
     *next_pc = (uint16_t)(pc + value);
@@ -415,7 +419,8 @@ static int encode_instruction(const assembler *state, const char *opcode,
         return 0;
       }
       if (pass == 2) {
-        write_byte(image, (uint16_t)(pc + i), (uint8_t)value);
+        write_byte(image, (uint16_t)(pc + i), (uint8_t)value,
+                   state->line_number);
       }
     }
     *next_pc = (uint16_t)(pc + operand_count);
@@ -429,7 +434,8 @@ static int encode_instruction(const assembler *state, const char *opcode,
         return 0;
       }
       if (pass == 2) {
-        write_word(image, (uint16_t)(pc + i * 2), (uint16_t)value);
+        write_word(image, (uint16_t)(pc + i * 2), (uint16_t)value,
+                   state->line_number);
       }
     }
     *next_pc = (uint16_t)(pc + operand_count * 2);
@@ -479,7 +485,7 @@ static int encode_instruction(const assembler *state, const char *opcode,
   }
   if (base != 0) {
     if (pass == 2) {
-      write_byte(image, pc, (uint8_t)base);
+      write_byte(image, pc, (uint8_t)base, state->line_number);
     }
     *next_pc = (uint16_t)(pc + 1);
     return 1;
@@ -512,8 +518,9 @@ static int encode_instruction(const assembler *state, const char *opcode,
           return 0;
         }
         if (pass == 2) {
-          write_byte(image, pc, jumps[i].opcode);
-          write_word(image, (uint16_t)(pc + 1), (uint16_t)value);
+          write_byte(image, pc, jumps[i].opcode, state->line_number);
+          write_word(image, (uint16_t)(pc + 1), (uint16_t)value,
+                     state->line_number);
         }
         *next_pc = (uint16_t)(pc + 3);
         return 1;
@@ -529,7 +536,8 @@ static int encode_instruction(const assembler *state, const char *opcode,
       return 0;
     }
     if (pass == 2) {
-      write_byte(image, pc, (uint8_t)(0x40 | (dst << 3) | src));
+      write_byte(image, pc, (uint8_t)(0x40 | (dst << 3) | src),
+                 state->line_number);
     }
     *next_pc = (uint16_t)(pc + 1);
     return 1;
@@ -545,8 +553,9 @@ static int encode_instruction(const assembler *state, const char *opcode,
       return 0;
     }
     if (pass == 2) {
-      write_byte(image, pc, (uint8_t)(0x06 | (r << 3)));
-      write_byte(image, (uint16_t)(pc + 1), (uint8_t)value);
+      write_byte(image, pc, (uint8_t)(0x06 | (r << 3)), state->line_number);
+      write_byte(image, (uint16_t)(pc + 1), (uint8_t)value,
+                 state->line_number);
     }
     *next_pc = (uint16_t)(pc + 2);
     return 1;
@@ -562,8 +571,9 @@ static int encode_instruction(const assembler *state, const char *opcode,
       return 0;
     }
     if (pass == 2) {
-      write_byte(image, pc, (uint8_t)(0x01 | (rp << 4)));
-      write_word(image, (uint16_t)(pc + 1), (uint16_t)value);
+      write_byte(image, pc, (uint8_t)(0x01 | (rp << 4)), state->line_number);
+      write_word(image, (uint16_t)(pc + 1), (uint16_t)value,
+                 state->line_number);
     }
     *next_pc = (uint16_t)(pc + 3);
     return 1;
@@ -580,7 +590,7 @@ static int encode_instruction(const assembler *state, const char *opcode,
            : strcmp(opcode, "DCX") == 0 ? 0x0b
                                          : 0x09;
     if (pass == 2) {
-      write_byte(image, pc, (uint8_t)(base | (rp << 4)));
+      write_byte(image, pc, (uint8_t)(base | (rp << 4)), state->line_number);
     }
     *next_pc = (uint16_t)(pc + 1);
     return 1;
@@ -594,7 +604,7 @@ static int encode_instruction(const assembler *state, const char *opcode,
     }
     base = strcmp(opcode, "PUSH") == 0 ? 0xc5 : 0xc1;
     if (pass == 2) {
-      write_byte(image, pc, (uint8_t)(base | (rp << 4)));
+      write_byte(image, pc, (uint8_t)(base | (rp << 4)), state->line_number);
     }
     *next_pc = (uint16_t)(pc + 1);
     return 1;
@@ -608,7 +618,7 @@ static int encode_instruction(const assembler *state, const char *opcode,
     }
     base = strcmp(opcode, "LDAX") == 0 ? 0x0a : 0x02;
     if (pass == 2) {
-      write_byte(image, pc, (uint8_t)(base | (rp << 4)));
+      write_byte(image, pc, (uint8_t)(base | (rp << 4)), state->line_number);
     }
     *next_pc = (uint16_t)(pc + 1);
     return 1;
@@ -622,7 +632,7 @@ static int encode_instruction(const assembler *state, const char *opcode,
     }
     base = strcmp(opcode, "INR") == 0 ? 0x04 : 0x05;
     if (pass == 2) {
-      write_byte(image, pc, (uint8_t)(base | (r << 3)));
+      write_byte(image, pc, (uint8_t)(base | (r << 3)), state->line_number);
     }
     *next_pc = (uint16_t)(pc + 1);
     return 1;
@@ -651,7 +661,8 @@ static int encode_instruction(const assembler *state, const char *opcode,
           return 0;
         }
         if (pass == 2) {
-          write_byte(image, pc, (uint8_t)(alur[i].opcode | r));
+          write_byte(image, pc, (uint8_t)(alur[i].opcode | r),
+                     state->line_number);
         }
         *next_pc = (uint16_t)(pc + 1);
         return 1;
@@ -664,8 +675,9 @@ static int encode_instruction(const assembler *state, const char *opcode,
           return 0;
         }
         if (pass == 2) {
-          write_byte(image, pc, alui[i].opcode);
-          write_byte(image, (uint16_t)(pc + 1), (uint8_t)value);
+          write_byte(image, pc, alui[i].opcode, state->line_number);
+          write_byte(image, (uint16_t)(pc + 1), (uint8_t)value,
+                     state->line_number);
         }
         *next_pc = (uint16_t)(pc + 2);
         return 1;
@@ -906,7 +918,8 @@ static int assemble_listing(const char *text, i8080_image *image,
     if (record.byte_count != 0) {
       size_t i;
       for (i = 0; i < record.byte_count; ++i) {
-        write_byte(image, (uint16_t)(record.address + i), record.bytes[i]);
+        write_byte(image, (uint16_t)(record.address + i), record.bytes[i],
+                   line_number);
       }
       continue;
     }
@@ -931,7 +944,7 @@ static int assemble_listing(const char *text, i8080_image *image,
           return 0;
         }
         while (value-- > 0) {
-          write_byte(image, record.address++, 0x00);
+          write_byte(image, record.address++, 0x00, line_number);
         }
       }
     }

@@ -1,4 +1,5 @@
 #include "i8080_asm.h"
+#include "i8080_coverage_source_display.h"
 #include "i8080_emu.h"
 
 #include <errno.h>
@@ -109,12 +110,14 @@ static int write_coverage_ndjson(const char *path,
 
 static int parse_args(int argc, char **argv, int *emit_coverage,
                       int *capture_coverage,
+                      int *display_coverage_source_on_exit,
                       const char **coverage_out_path,
                       const char **program_path) {
   int i;
 
   *emit_coverage = 0;
   *capture_coverage = 0;
+  *display_coverage_source_on_exit = 0;
   *coverage_out_path = NULL;
   *program_path = NULL;
 
@@ -130,6 +133,11 @@ static int parse_args(int argc, char **argv, int *emit_coverage,
       }
       *capture_coverage = 1;
       *coverage_out_path = argv[++i];
+      continue;
+    }
+    if (strcmp(argv[i], "--coverage-source-display-on-exit") == 0) {
+      *capture_coverage = 1;
+      *display_coverage_source_on_exit = 1;
       continue;
     }
     if (*program_path != NULL) {
@@ -159,14 +167,17 @@ int main(int argc, char **argv) {
   const char *program_path = NULL;
   const char *coverage_out_path = NULL;
   int capture_coverage = 0;
+  int display_coverage_source_on_exit = 0;
   int emit_coverage = 0;
   int run_result;
 
   if (!parse_args(argc, argv, &emit_coverage, &capture_coverage,
+                  &display_coverage_source_on_exit,
                   &coverage_out_path,
                   &program_path)) {
     fprintf(stderr,
-            "usage: %s [--coverage] [--coverage-out path] program.asm\n",
+            "usage: %s [--coverage] [--coverage-out path] "
+            "[--coverage-source-display-on-exit] program.asm\n",
             argv[0]);
     return 1;
   }
@@ -189,6 +200,15 @@ int main(int argc, char **argv) {
   run_result = i8080_run(&cpu, 10000000);
   if (emit_coverage) {
     write_coverage_report(stderr, &coverage);
+  }
+  if (display_coverage_source_on_exit) {
+    putchar('\n');
+    if (!i8080_write_coverage_source_display(stdout, program_path, &image,
+                                             &coverage, &error)) {
+      fprintf(stderr, "%s: %s\n", program_path, error.message);
+      return 1;
+    }
+    fflush(stdout);
   }
   if (coverage_out_path != NULL &&
       !write_coverage_ndjson(coverage_out_path, &coverage)) {

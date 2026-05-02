@@ -77,11 +77,17 @@ This manual reflects the behavior validated by the current `make test` fixture.
 - When `o/i8080emu` is invoked as
   `o/i8080emu --coverage-out coverage.ndjson program.asm`, it writes the
   coverage report to an NDJSON file.
+- When `o/i8080emu` is invoked as
+  `o/i8080emu --coverage-source-display-on-exit program.asm`, it prints a
+  newline-prefixed `source coverage:` report to stdout after execution.
 - Each nonzero coverage line has the form `0xADDR COUNT`, where `COUNT` is how
   many times that address became the instruction pointer for an opcode fetch.
 - Each NDJSON address record includes `kind`, `address`, `address_hex`, and
   `hits`, and the file ends with a `summary` record containing
   `covered_addresses` and `total_instruction_fetches`.
+- Each source-coverage line includes the source line number, the aggregated hit
+  count for that line, and the original source text; `...` compresses uncovered
+  spans between covered lines.
 - The report ends with `covered_addresses` and
   `total_instruction_fetches` summary lines.
 - The current automated coverage validates that the original OCR image boots to
@@ -92,3 +98,4 @@ This manual reflects the behavior validated by the current `make test` fixture.
     printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
     printf '(LAMBDA (X) X) (3) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
     printf 'NULL (NIL) \nNULL ((NIL)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
+    printf 'NULL (NIL) \n' | ./o/i8080emu --coverage-source-display-on-exit src/lisp_8080_corrected.asm
