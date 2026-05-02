@@ -35,11 +35,20 @@ Every commit is an implementation, a refactoring, or a bugfix, but not more than
 - Deleting superseded code/assets is expected and does not require extra confirmation
 
 ## Change constraint remediation
-If a task would exceed these limits:
-1. Stop coding.
-2. Split the task into smaller backlog items.
-3. Update docs/IMPLEMENTATION_BACKLOG.md.
-4. Implement the first new task.
+If a task would exceed these limits for a single change:
+1. Split the task into smaller backlog items.
+2. Update docs/IMPLEMENTATION_BACKLOG.md.
+3. Implement as many of the resulting backlog items as feasible in the same turn, in priority order.
+4. Create a separate compliant commit for each change.
+5. Stop only when:
+    - the original request is fully completed, or
+    - an external blocker prevents further progress.
+
+## Multi-change execution
+- “One purpose per change” applies per commit, not per user request.
+- When the user asks to implement all remaining backlog, codex should continue through the backlog
+item by item, making multiple commits as needed, until the remaining backlog is complete or blocked.
+- Do not stop after the first newly split task unless the user asked for partial progress.
 
 ## Official Build Commands
 
