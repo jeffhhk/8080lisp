@@ -29,7 +29,7 @@ There is also an optional browser target now: `make i8080web` produces
 `o/i8080web.html`, a standalone page that bundles the compiled emulator and
 `src/lisp_8080_corrected.asm` into one textarea-driven monitor UI.
 
-I also implemented a coverage tool, for using a REPL to browse how the actual code works.  Evaluating a very simple expression has lots of uninteresting coverage, like the reader, etc, so there's a mechanism for taking a baseline and then printing the residual.  Here's what happens if we ask if the list of NIL is NULL (false), and compare it what happens with doing the same for a list of two NILS:
+I also implemented a coverage feature, so that using a REPL can help browse the working code.  Evaluating a very simple expression has lots of uninteresting coverage, like the reader, etc, so there's a mechanism for taking a baseline and then printing the residual.  Here's what happens if we ask if the list of NIL is NULL (false), and compare it what happens with doing the same for a list of two NILS:
 
     $ printf 'NULL ((NIL)) \n' | ./o/i8080emulisp.com  --coverage-out coverage-baseline.ndjson src/lisp_8080_corrected.asm
 
@@ -59,7 +59,7 @@ The leading column is the number of times that instruction ran.
 
 All original assembler comments are preserved.  So, as the comments show, this is how we `"GET REST OF LIST"`.
 
-The article exhibits a mixed source and machine code listing, with source code to the right and machine code to the left.   In my emulator, such an .asm file serves as both source and binary.
+The article exhibits a mixed source and machine code listing, with source code to the right and machine code to the left.   In the emulator, such an .asm file serves as both source and binary.
 
 A provenance report reconciles each of 6 minor differences between the raw OCR listing and the one that runs.
 
