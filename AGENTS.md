@@ -1,7 +1,7 @@
 # Global information
 The current product goal and requirements are held in docs/IMPLEMENTATION_PLAN.md
 
-A request may contain more than one change.
+A user request may involve more than one Change.
 
 ## Change constraints
 These apply to every change.
