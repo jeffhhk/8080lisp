@@ -10,11 +10,15 @@ The IBM PC would not come out for nearly 3 more years, (Aug 1981).  Because ther
 
 Typical setups of the time included second-hand ASR-33 teletypes (individuals couldn't just order them), VDM-1 style S-100 video cards, or some variation of the "TV Typewriter Cookbook".  Maxing out the 64k RAM address space was still expensive, roughly $1200 in 1978 (equivalent to $6000 today).
 
-Earlier that year, John McCarthy had published ["History of LISP"](https://dl.acm.org/doi/10.1145/960118.808387) in the [HOPL I](https://dl.acm.org/toc/sigplan/1978/13/8) conference.
+Earlier that year, John McCarthy had published ["History of LISP"](https://dl.acm.org/doi/10.1145/960118.808387) in the [HOPL I](https://dl.acm.org/toc/sigplan/1978/13/8) conference.  Lisp was 19 years old.  By comparison, in 2026, Clojure is also 19 years old.
 
 Also earlier in 1978 was [The Revised Report on Scheme](https://research.scheme.org/lambda-papers/lambda-papers-revised-report.html#lisp-is-a-ball-of-mud) (aka MIT AI Memo No 452).
 
-# Description
+# 1978 Article
+
+The article demonstrates a miniature EVALQUOTE style (MACLisp style) Lisp interpreter in 1757 bytes of 8080 code.  Its addressing scheme is limited to 64k RAM.  It does not include a garbage collector.
+
+# Reanimation
 
 I took the 8080 LISP article, OCRed only the listing, and vibe coded an assembler and emulator, bug for bug with the original.  Examples below.
 
@@ -63,7 +67,7 @@ The article exhibits a mixed source and machine code listing, with source code t
 
 A provenance report reconciles each of 6 minor differences between the raw OCR listing and the one that runs.
 
-## Cosmopositan binary
+## Cosmopositan binary artifact
 
 It is preserved in a cosmopolitan binary `8080lisp.com`, which will run on any Mac, Linux or Windows machine that supports Intel 64 bit executables.  Cosmopolitan binaries are also zip files.  Source code and artifacts (including the original PDF) are preserved in its zip structure.  To run the examples above, you have to get the lisp binary out of it first, as noted in the usage string:
 
@@ -71,6 +75,10 @@ It is preserved in a cosmopolitan binary `8080lisp.com`, which will run on any M
 
 Artifacts include the original PDF, and the automatically gathered prompts used to create the project.
 
-## Emscripten binary
+## Emscripten binary artifact
 
 The make target `package-web` also produces as single file HTML page `o/i8080web.html` containing an emscripten-based emulator hosting a REPL.
+
+## Prompts
+
+All prompts for Codex/GPT-5.4 were recorded by an AGENTS.md policy, in docs/DEVELOPMENT_LOG.md.
