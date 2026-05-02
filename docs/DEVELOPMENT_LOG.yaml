@@ -543,3 +543,22 @@
       result: resolved /home/jeff/bin/cosmo/bin/x86_64-unknown-cosmo-cc
     - verification: make build-cosmo
       result: ran make clean and rebuilt o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with x86_64-unknown-cosmo-cc
+- meta: {_: feature, guid: w3f8}
+  title: Emit cross-platform `.com` binaries from the Cosmopolitan build
+  prompt: |
+    Patch the Makefile so I can build on linux and run the resulting binaries on MacOS and Windows.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make test
+      result: 26 tests 0 failures 0 skipped
+    - verification: PATH="$PATH:$HOME/bin/cosmo/bin" command -v x86_64-unknown-cosmo-cc
+      result: resolved /home/jeff/bin/cosmo/bin/x86_64-unknown-cosmo-cc
+    - verification: make build-cosmo
+      result: rebuilt o/lisp_gcc.com, o/i8080asm.com, o/i8080emu.com, and o/ocr_validator.com with x86_64-unknown-cosmo-cc and repackaged o/i8080emu.com as a self-extracting archive
+    - verification: ls o/*.com
+      result: listed o/i8080asm.com, o/i8080emu.com, o/lisp_gcc.com, and o/ocr_validator.com
+    - verification: printf 'NULL (NIL) \n' | ./o/i8080emu.com src/lisp_8080_corrected.asm
+      result: printed >>T from the Cosmopolitan emulator binary on Linux
+    - verification: unzip -l o/i8080emu.com | sed -n '1,12p'
+      result: listed the embedded source and documentation payload from the packaged Cosmopolitan emulator binary

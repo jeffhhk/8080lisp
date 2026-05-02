@@ -181,3 +181,18 @@
     - file: tests/i8080_emu_test.c
     - file: docs/BUILD.md
     - file: docs/Reference.md
+
+- meta: {_: feature, id: PORT-0002N, status: done, priority: medium, guid: n4q7}
+  title: Emit Windows-runnable Cosmopolitan `.com` binaries from `make build-cosmo`
+  expected_behavior: |
+    Building the Cosmopolitan artifacts on Linux should produce `.com`
+    executables that remain runnable on Linux and can also be transferred to
+    supported MacOS and Windows hosts.
+  evidence:
+    - evidence: `Makefile` now parameterizes the executable suffix with `BINEXT` and drives `make build-cosmo` with `BINEXT=.com`.
+    - evidence: The recursive Cosmopolitan build still uses `x86_64-unknown-cosmo-cc` and now writes `o/lisp_gcc.com`, `o/i8080asm.com`, `o/i8080emu.com`, and `o/ocr_validator.com`.
+    - evidence: The emulator packaging step now wraps `o/i8080emu.com` directly, preserving the self-extracting source/documentation payload on the cross-platform artifact.
+  related:
+    - file: Makefile
+    - file: docs/BUILD.md
+    - file: docs/IMPLEMENTATION_PLAN.md
