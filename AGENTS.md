@@ -38,7 +38,7 @@ Every commit is an implementation, a refactoring, or a bugfix, but not more than
 ## Change constraint remediation
 If a task would exceed these limits for a single change:
 1. Split the task into smaller backlog items.
-2. Update docs/IMPLEMENTATION_BACKLOG.md.
+2. Update docs/IMPLEMENTATION_BACKLOG.yaml.
 3. Implement as many of the resulting backlog items as feasible in the same turn, in priority order.
 4. Create a separate compliant commit for each change.
 5. Stop only when:
@@ -102,6 +102,50 @@ Never ask for permission to `git rm` or `git rm -rf`.
             <verification> is the action taken
             <brief_result> is the test count, if known, e.g. "M tests N failures K skipped"
     - Add new changes to the end of the log.
+4b. Update Backlog Items in docs/IMPLEMENTATION_BACKLOG.yaml
+    - For any newly discovered confirmed bug, add or update a bug Backlog Item before finishing the change.
+    - For any newly discovered suspected bug with reproducible evidence or concrete technical indicators, add or update a bug Backlog Item before finishing the change.
+    - Do not create a bug Backlog Item for a test-authoring mistake or an issue that was disproved during investigation.
+    - Prefer updating an existing Backlog Item over creating a duplicate when the issue appears to be the same underlying problem.
+    - Bug Backlog Items must be explicitly marked as bugs and should summarize:
+        - the observed behavior
+        - the evidence
+        - the current confidence or uncertainty
+        - any known workaround or containment
+    - If an existing Backlog Item gains materially new evidence, update that item instead of adding a new one.
+    - Use the following format:
+            - meta: {_: <kind>, id: <task id>, status: <status>, priority: <priority>, guid: <guid>}
+              title: <title>
+              expected_behavior: |
+                  <expected behavior>
+              evidence:
+                  <evidence items>
+              acceptance:                 # optional field
+                  <acceptance items>
+              related:                    # optional field
+                  <related items>
+              notes: |                    # optional field
+                  <notes>
+        where:
+            <kind> is one of: bug/feature/refactor/test/docs/investigation
+            <task id> is a stable task identifier such as PORT-0002E
+            <status> is one of: open/in_progress/blocked/done/wont_fix
+            <priority> is one of: high/medium/low
+            <guid> four random characters of the class [a-z0-9]
+            <title> is a one line title.  Phrase bugs with the word "should"
+            <expected behavior> is a concise statement of the expected behavior
+            <evidence items> is a list of evidence entries for or against the expected behavior
+            <acceptance items> is a list of conditions that would make the item complete
+            <related items> is an optional list of related task IDs, development log guids, or file paths
+            <notes> is optional extra context such as uncertainty, workaround, or containment
+    - For each of the <evidence items>, use a brief the concrete observation supporting the item
+    - For each of the <acceptance items>, use a brief concrete statement.
+    - For each of the <related items>, use one of the following formats:
+            - task: <task id>
+            - development_log: <guid>
+            - file: <path>
+    - Add new Backlog Items to the end of the file.
+    - Keep task IDs unique.  Updating an existing item is preferred to creating a duplicate for the same underlying issue.
 5. If you have changed build/run commands, udate docs/BUILD.md
 6. Commit using the task ID and one of the following three forms:
     - implementation: <task ID>: <description>
