@@ -87,6 +87,8 @@ hooks and optional coverage reporting
 - `make i8080web` optionally emits `o/i8080web.html`, a single-file browser
   page that bundles the compiled emulator and the corrected Lisp listing behind
   textarea-based monitor input and output.
+- In `o/i8080web.html`, `eval` resumes the current monitor session, while
+  `Restart` reboots the embedded emulator and clears the output pane.
 
 #### Options
 

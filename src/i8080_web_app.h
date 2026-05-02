@@ -2,5 +2,6 @@
 #define I8080_WEB_APP_H
 
 const char *i8080web_eval(const char *input);
+void i8080web_restart(void);
 
 #endif

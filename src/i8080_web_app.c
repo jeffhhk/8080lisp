@@ -31,11 +31,22 @@ typedef struct {
   i8080_image image;
   i8080_cpu cpu;
   i8080web_session session;
+  int image_ready;
+  int emulator_ready;
 } i8080web_state;
 
 /* Keep the large emulator state off the wasm stack so browser calls do not
  * fault on the much smaller default WebAssembly stack. */
 static i8080web_state i8080web;
+
+static void session_reset(i8080web_session *session, i8080_cpu *cpu,
+                          const char *input) {
+  session->cpu = cpu;
+  session->input = (const unsigned char *)(input != NULL ? input : "");
+  session->input_pos = 0;
+  session->output_len = 0;
+  session->output[0] = '\0';
+}
 
 static void output_append_text(i8080web_session *session, const char *text) {
   size_t available;
@@ -135,23 +146,51 @@ static void host_abend(void *ctx, uint8_t code) {
   (void)code;
 }
 
-EMSCRIPTEN_KEEPALIVE const char *i8080web_eval(const char *input) {
-  i8080web_session *session = &i8080web.session;
+static int ensure_image(void) {
+  memset(&i8080web.error, 0, sizeof(i8080web.error));
+  memset(&i8080web.image, 0, sizeof(i8080web.image));
+  if (!i8080_assemble_text("src/lisp_8080_corrected.asm",
+                           i8080web_embedded_program, &i8080web.image,
+                           &i8080web.error)) {
+    i8080web.image_ready = 0;
+    i8080web.emulator_ready = 0;
+    return 0;
+  }
+  i8080web.image_ready = 1;
+  return 1;
+}
+
+static int restart_emulator(void) {
   i8080_hooks hooks = {
       .inch = host_inch,
       .outc = host_outc,
       .abend = host_abend,
-      .ctx = session,
+      .ctx = &i8080web.session,
   };
+
+  if (!i8080web.image_ready && !ensure_image()) {
+    return 0;
+  }
+
+  i8080_init(&i8080web.cpu, &hooks);
+  i8080_load_image(&i8080web.cpu, &i8080web.image);
+  i8080web.emulator_ready = 1;
+  i8080web.session.cpu = &i8080web.cpu;
+  return 1;
+}
+
+EMSCRIPTEN_KEEPALIVE void i8080web_restart(void) {
+  session_reset(&i8080web.session, &i8080web.cpu, "");
+  restart_emulator();
+}
+
+EMSCRIPTEN_KEEPALIVE const char *i8080web_eval(const char *input) {
+  i8080web_session *session = &i8080web.session;
   int run_result;
 
-  memset(&i8080web, 0, sizeof(i8080web));
-  session->cpu = &i8080web.cpu;
-  session->input = (const unsigned char *)(input != NULL ? input : "");
+  session_reset(session, &i8080web.cpu, input);
 
-  if (!i8080_assemble_text("src/lisp_8080_corrected.asm",
-                           i8080web_embedded_program, &i8080web.image,
-                           &i8080web.error)) {
+  if (!i8080web.image_ready && !ensure_image()) {
     if (i8080web.error.line_number != 0) {
       output_append_format(session, "src/lisp_8080_corrected.asm:%zu: %s\n",
                            i8080web.error.line_number,
@@ -162,8 +201,18 @@ EMSCRIPTEN_KEEPALIVE const char *i8080web_eval(const char *input) {
     return session->output;
   }
 
-  i8080_init(&i8080web.cpu, &hooks);
-  i8080_load_image(&i8080web.cpu, &i8080web.image);
+  if (!i8080web.emulator_ready && !restart_emulator()) {
+    if (i8080web.error.line_number != 0) {
+      output_append_format(session, "src/lisp_8080_corrected.asm:%zu: %s\n",
+                           i8080web.error.line_number,
+                           i8080web.error.message);
+    } else {
+      output_append_format(session, "%s\n", i8080web.error.message);
+    }
+    return session->output;
+  }
+
+  i8080web.cpu.halted = 0;
   run_result = i8080_run(&i8080web.cpu, 10000000);
 
   if (run_result == I8080_STEP_LIMIT) {

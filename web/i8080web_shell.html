@@ -143,7 +143,8 @@
         The reader is EVALQUOTE style, so input must be two S-expressions, separated by whitespace.
       </p>
       <div class="toolbar">
-        <button id="run-button" disabled>Run Monitor Input</button>
+        <button id="run-button" disabled>eval</button>
+        <button id="restart-button" disabled>Restart</button>
         <div id="status">Loading runtime…</div>
       </div>
       <div class="panes">
@@ -163,6 +164,7 @@ FF (((A.B).C))
     </main>
     <script>
       const runButton = document.getElementById("run-button");
+      const restartButton = document.getElementById("restart-button");
       const inputArea = document.getElementById("input");
       const outputArea = document.getElementById("output");
       const statusNode = document.getElementById("status");
@@ -179,12 +181,15 @@ FF (((A.B).C))
         },
         onRuntimeInitialized: function() {
           runButton.disabled = false;
+          restartButton.disabled = false;
+          Module.ccall("i8080web_restart", null, [], []);
           setStatus("Runtime ready.");
         }
       };
 
       runButton.addEventListener("click", function() {
         runButton.disabled = true;
+        restartButton.disabled = true;
         setStatus("Running...");
         try {
           outputArea.value = Module.ccall(
@@ -196,6 +201,21 @@ FF (((A.B).C))
           setStatus("Run complete.");
         } finally {
           runButton.disabled = false;
+          restartButton.disabled = false;
+        }
+      });
+
+      restartButton.addEventListener("click", function() {
+        runButton.disabled = true;
+        restartButton.disabled = true;
+        setStatus("Restarting...");
+        try {
+          Module.ccall("i8080web_restart", null, [], []);
+          outputArea.value = "";
+          setStatus("Restart complete.");
+        } finally {
+          runButton.disabled = false;
+          restartButton.disabled = false;
         }
       });
     </script>

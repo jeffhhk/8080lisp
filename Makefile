@@ -105,7 +105,7 @@ $(OCR_VALIDATOR_TEST): $(OCR_VALIDATOR_SRCS) $(OCR_VALIDATOR_TEST_SRC) | $(BUILD
 
 $(I8080_WEB): $(ASM_SRCS) $(EMU_SRCS) $(WEB_APP_SRCS) $(WEB_MAIN_SRC) $(RUNTIME_EMSCRIPTEN_SRCS) $(WEB_EMBED_HEADER) $(WEB_SHELL) ensure_emsdk_installed.sh | $(BUILD_DIR)
 	$(EMCC_ENV) ./ensure_emsdk_installed.sh
-	$(EMCC_ENV) bash -lc '. "$(EMSDK_DIR)/emsdk_env.sh" >/dev/null && emcc -O2 -Wall -Wextra -std=c11 -Isrc -Itests -I$(BUILD_DIR) -sALLOW_MEMORY_GROWTH=1 -sENVIRONMENT=web -sEXIT_RUNTIME=0 -sSINGLE_FILE=1 -sEXPORTED_FUNCTIONS=_main,_i8080web_eval -sEXPORTED_RUNTIME_METHODS=ccall,cwrap --shell-file $(WEB_SHELL) -o $@ $(ASM_SRCS) $(EMU_SRCS) $(WEB_APP_SRCS) $(WEB_MAIN_SRC) $(RUNTIME_EMSCRIPTEN_SRCS)'
+	$(EMCC_ENV) bash -lc '. "$(EMSDK_DIR)/emsdk_env.sh" >/dev/null && emcc -O2 -Wall -Wextra -std=c11 -Isrc -Itests -I$(BUILD_DIR) -sALLOW_MEMORY_GROWTH=1 -sENVIRONMENT=web -sEXIT_RUNTIME=0 -sSINGLE_FILE=1 -sEXPORTED_FUNCTIONS=_main,_i8080web_eval,_i8080web_restart -sEXPORTED_RUNTIME_METHODS=ccall,cwrap --shell-file $(WEB_SHELL) -o $@ $(ASM_SRCS) $(EMU_SRCS) $(WEB_APP_SRCS) $(WEB_MAIN_SRC) $(RUNTIME_EMSCRIPTEN_SRCS)'
 
 lisp-gcc: $(LISP_GCC)
 

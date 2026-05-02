@@ -627,3 +627,20 @@
       result: 32 tests 0 failures 0 skipped
     - verification: printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
       result: printed >>T and exited successfully after stdin EOF
+- meta: {_: feature, guid: e2v9}
+  title: Keep the browser monitor session live until explicit restart
+  prompt: |
+    In make package-web, change the name of the "Run Monitor Input" button to eval, and make it so that the evaluator does not reset afterward.  Then make a separate button to the button's right called "Restart" which resets the emulator and Output window.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: rebuilt o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: inject an artificial failure into tests/i8080_web_test.c and rerun make o/i8080_web_test && ./o/i8080_web_test
+      result: the stateful web regression failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/i8080_web_test.c and rerun make o/i8080_web_test && ./o/i8080_web_test
+      result: 4 tests 0 failures 0 skipped
+    - verification: make test
+      result: 34 tests 0 failures 0 skipped
+    - verification: make package-web
+      result: rebuilt o/i8080web.html with `eval` and `Restart` controls plus the exported `i8080web_restart` entrypoint

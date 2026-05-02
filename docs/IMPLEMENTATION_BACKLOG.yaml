@@ -242,3 +242,24 @@
     - file: src/i8080_web_app.c
     - file: tests/i8080_web_test.c
     - task: PORT-0002O
+
+- meta: {_: feature, id: PORT-0002Q, status: done, priority: medium, guid: q7r5}
+  title: Keep the browser monitor session live until explicit restart
+  expected_behavior: |
+    The packaged browser monitor should preserve emulator definitions and memory
+    across repeated `eval` runs, and provide an explicit `Restart` control that
+    reboots the emulator and clears the output pane.
+  evidence:
+    - evidence: "`src/i8080_web_app.c` now separates per-call input/output reset from emulator reset, so `i8080web_eval` resumes the existing CPU until `i8080web_restart` is called."
+    - evidence: "`web/i8080web_shell.html` renames the action button to `eval`, adds a `Restart` button to its right, clears the output pane on restart, and initializes the wasm runtime with an explicit restart."
+    - evidence: "`tests/i8080_web_test.c` now proves a `DEFINE`d `ID` function survives a second `i8080web_eval` call and that `i8080web_restart` returns a later `ID (3)` query to `ABEND 0x00`."
+    - evidence: "`make package-web` rebuilt `o/i8080web.html` with both `_i8080web_eval` and `_i8080web_restart` exported."
+  related:
+    - task: PORT-0002O
+    - task: PORT-0002P
+    - file: Makefile
+    - file: src/i8080_web_app.c
+    - file: src/i8080_web_app.h
+    - file: web/i8080web_shell.html
+    - file: tests/i8080_web_test.c
+    - file: docs/Reference.md
