@@ -280,3 +280,18 @@
     - task: PORT-0002Q
     - file: .github/workflows/pages.yml
     - file: docs/BUILD.md
+
+- meta: {_: bug, id: PORT-0002S, status: done, priority: medium, guid: s9t4}
+  title: GitHub Pages workflow should use current actions and explain first-run enablement
+  expected_behavior: |
+    The GitHub Pages workflow should avoid deprecated Node 20-backed action
+    releases and should document the one-time repository Pages enablement needed
+    before `configure-pages` can discover the site.
+  evidence:
+    - evidence: "The initial Pages workflow used `actions/checkout@v4` and `actions/configure-pages@v5`, which produced the runner warning that Node.js 20 actions are deprecated."
+    - evidence: "A first push to the workflow failed in `configure-pages` with `Get Pages site failed` / `Not Found`, which indicates the repository's Pages source had not yet been enabled for GitHub Actions."
+    - evidence: "`.github/workflows/pages.yml` now uses `actions/checkout@v5`, `actions/configure-pages@v6`, and `actions/deploy-pages@v5`, and `docs/BUILD.md` now documents the required one-time `GitHub Actions` Pages setting."
+  related:
+    - task: PORT-0002R
+    - file: .github/workflows/pages.yml
+    - file: docs/BUILD.md

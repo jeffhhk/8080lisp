@@ -65,6 +65,9 @@ browser without shipping a separate assembler executable or auxiliary assets.
 respects `EMSDK_DIR` and `EMSDK_VERSION` overrides when invoking the install
 script and `emcc`.
 
-To activate the workflow-backed site, set the repository's GitHub Pages source
-to `GitHub Actions` in the repository Pages settings. The workflow publishes the
-generated artifact from CI; it does not require committing `o/i8080web.html`.
+To activate the workflow-backed site, first set the repository's GitHub Pages
+source to `GitHub Actions` in the repository Pages settings. Until that one-time
+setting is enabled, `actions/configure-pages` fails with a `Get Pages site
+failed` / `Not Found` error because the repository does not yet have a Pages
+site configured. The workflow publishes the generated artifact from CI; it does
+not require committing `o/i8080web.html`.
