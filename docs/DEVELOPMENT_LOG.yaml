@@ -20,3 +20,30 @@
       result: emitted gcc build command followed by ./o/hello_gcc
     - verification: size --format=GNU --radix=10 o/hello_gcc
       result: text=369 data=1599 bss=8 total=1976
+- meta: {_: feature, guid: h7q2}
+  title: Add a GAS runtime scaffold with monitor I/O shims
+  prompt: |
+    Read orig/lisp_8080_rawocr_2026-04-13.asm
+    Assemble, fix and test a gas/gcc binary.
+    Provide implementations of:
+        - OUTC: output character
+        - CRLF: output EOL (LF only)
+        - INCH: input character
+    Read docs/IMPLEMENTATION_PLAN.md.
+    Use the original registers according to the map.
+    Have (but do not run) an additional build target that directs the build to the toolchain in ~/bin/cosmo/bin/cosmocc to produce a cosmopolitan binary.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc from GAS and C scaffold sources
+    - verification: make test
+      result: 2 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into src/lisp_runtime_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from src/lisp_runtime_test.c and rerun make test
+      result: 2 tests 0 failures 0 skipped
+    - verification: make -n lisp-cosmo
+      result: emitted /home/jeff/bin/cosmo/bin/cosmocc -O2 -Wall -Wextra -o o/lisp_cosmo.com src/lisp_runtime.S src/lisp_host_io.c src/lisp_main.c
+    - verification: size --format=GNU --radix=10 o/lisp_gcc
+      result: text=934 data=1968 bss=69712 total=72614

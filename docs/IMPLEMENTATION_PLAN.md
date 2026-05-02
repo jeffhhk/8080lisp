@@ -9,7 +9,7 @@ Port the 8080 lisp implementation to a cosmopolitan binary.
 - `make clean`
 - `make build` for the local `gcc` validation target
 - `make test` for the local `gcc` validation target
-- `make hello-cosmo` for the separate `cosmocc` target
+- `make lisp-cosmo` for the separate `cosmocc` target
 
 ## Implementation rules
 

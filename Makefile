@@ -1,11 +1,15 @@
 COSMOCC := $(HOME)/bin/cosmo/bin/cosmocc
 CC := gcc
+CFLAGS := -O2 -Wall -Wextra -std=c11
 BUILD_DIR := o
-HELLO_SRC := src/hello_world.c
-HELLO_GCC := $(BUILD_DIR)/hello_gcc
-HELLO_COSMO := $(BUILD_DIR)/hello_cosmo.com
+RUNTIME_SRCS := src/lisp_runtime.S src/lisp_host_io.c
+MAIN_SRC := src/lisp_main.c
+TEST_SRC := src/lisp_runtime_test.c
+LISP_GCC := $(BUILD_DIR)/lisp_gcc
+LISP_TEST := $(BUILD_DIR)/lisp_test
+LISP_COSMO := $(BUILD_DIR)/lisp_cosmo.com
 
-.PHONY: clean build test hello-gcc hello-cosmo
+.PHONY: clean build test lisp-gcc lisp-test lisp-cosmo
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -13,17 +17,22 @@ clean:
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-$(HELLO_GCC): $(HELLO_SRC) | $(BUILD_DIR)
-	$(CC) -O2 -Wall -Wextra -o $@ $<
+$(LISP_GCC): $(RUNTIME_SRCS) $(MAIN_SRC) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $(RUNTIME_SRCS) $(MAIN_SRC)
 
-$(HELLO_COSMO): $(HELLO_SRC) | $(BUILD_DIR)
-	$(COSMOCC) -O2 -Wall -Wextra -o $@ $<
+$(LISP_TEST): $(RUNTIME_SRCS) $(TEST_SRC) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $(RUNTIME_SRCS) $(TEST_SRC)
 
-hello-gcc: $(HELLO_GCC)
+$(LISP_COSMO): $(RUNTIME_SRCS) $(MAIN_SRC) | $(BUILD_DIR)
+	$(COSMOCC) -O2 -Wall -Wextra -o $@ $(RUNTIME_SRCS) $(MAIN_SRC)
 
-hello-cosmo: $(HELLO_COSMO)
+lisp-gcc: $(LISP_GCC)
 
-build: hello-gcc
+lisp-test: $(LISP_TEST)
 
-test: hello-gcc
-	./$(HELLO_GCC)
+lisp-cosmo: $(LISP_COSMO)
+
+build: lisp-gcc
+
+test: lisp-test
+	./$(LISP_TEST)
