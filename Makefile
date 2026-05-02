@@ -130,7 +130,7 @@ build-cosmo-inner: build package-cosmo
 package-cosmo: $(I8080_EMU)
 	mv $(I8080_EMU) $(I8080_EMU).zip
 	zip $(I8080_EMU).zip $(COSMO_EMBED_FILES)
-	mv $(I8080_EMU).zip $(I8080_EMU)
+	mv $(I8080_EMU).zip $(I8080_COSMO)
 
 package-web: $(I8080_WEB)
 
