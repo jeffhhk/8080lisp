@@ -10,6 +10,7 @@ These apply to every change.
 - Repository must remain buildable
 - Take reasonable precautions to avoid duplicating code which could be reused.  Do not repeat yourself.  (DRY)
 - Every change must specify a set of automated tests (preferably existing ones) or manual verification that can verify the change.
+- Never consider git merge or git cherry-pick unless explicitly instructed.
 
 Every commit is an implementation, a refactoring, or a bugfix, but not more than one of these.
 
