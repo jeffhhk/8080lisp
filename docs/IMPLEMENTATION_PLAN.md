@@ -66,4 +66,5 @@ Preserve comments whenever they are more than a copy of the instruction, e.g.:
 The normative policy for this repository is:
 
 - `make test` is the primary automated verification gate
+- test every path in the original code unless it would involve adding parameters or entry points.
 - when a test is significantly changed, follow the Test Double Check Procedure end-to-end before final delivery
