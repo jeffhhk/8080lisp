@@ -86,3 +86,7 @@ This manual reflects the behavior validated by the current `make test` fixture.
   `total_instruction_fetches` summary lines.
 - The current automated coverage validates that the original OCR image boots to
   its monitor loop at `0x0599` without unsupported-opcode faults.
+
+### Emulator examples
+
+    printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
