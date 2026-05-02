@@ -77,7 +77,8 @@ Never ask for permission to `git rm` or `git rm -rf`.
         Would you like to run the following command?
         $ rm -rf build android-test/build
     If other clean targets are commonly required, offer to make those instead of asking for oneoff rm permissions.
-4. Update docs/DEVELOPMENT_LOG.yaml
+4. Update docs/DEVELOPMENT_LOG.yaml and docs/DEVELOPMENT_BACKLOG.yaml.  Try to not duplicate information between them.
+4b. Update docs/DEVELOPMENT_LOG.yaml
     - Do not include the dates of the changes, since they are already in the logs
     - Use the following format:
             - meta: {_: <kind>, num:<num> guid: <guid>}
@@ -102,7 +103,8 @@ Never ask for permission to `git rm` or `git rm -rf`.
             <verification> is the action taken
             <brief_result> is the test count, if known, e.g. "M tests N failures K skipped"
     - Add new changes to the end of the log.
-4b. Update Backlog Items in docs/IMPLEMENTATION_BACKLOG.yaml
+4c. Update Backlog Items in docs/IMPLEMENTATION_BACKLOG.yaml
+    - Reserve docs/IMPLEMENTATION_BACKLOG.yaml for deferred bug fixes and deferred feature requests only.
     - For any newly discovered confirmed bug, add or update a bug Backlog Item before finishing the change.
     - For any newly discovered suspected bug with reproducible evidence or concrete technical indicators, add or update a bug Backlog Item before finishing the change.
     - Do not create a bug Backlog Item for a test-authoring mistake or an issue that was disproved during investigation.
