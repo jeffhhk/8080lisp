@@ -65,7 +65,7 @@ A provenance report reconciles each of 6 minor differences between the raw OCR l
 
 ## Cosmopositan binary
 
-It is preserved in a cosmopolitan binary, which will run on any Mac, Linux or Windows machine that supports Intel 64 bit executables.  Cosmopolitan binaries are also zip files.  Source code and artifacts (including the original PDF) are preserved in its zip structure.  To run the examples above, you have to get the lisp binary out of it first, as noted in the usage string:
+It is preserved in a cosmopolitan binary `8080lisp.com`, which will run on any Mac, Linux or Windows machine that supports Intel 64 bit executables.  Cosmopolitan binaries are also zip files.  Source code and artifacts (including the original PDF) are preserved in its zip structure.  To run the examples above, you have to get the lisp binary out of it first, as noted in the usage string:
 
     unzip 8080lisp.com src/lisp_8080_corrected.asm
 
