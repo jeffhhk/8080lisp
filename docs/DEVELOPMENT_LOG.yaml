@@ -209,3 +209,10 @@
       result: make test failed with "artificial failure before final success"
     - verification: remove the artificial failure from tests/lisp_interpreter_test.c and rerun make test
       result: 16 tests 0 failures 0 skipped
+- meta: {_: refactor, guid: t5w1}
+  title: Convert the implementation backlog to structured YAML
+  prompt: |
+    I have updated AGENTS.md.  Please convert docs/IMPLEMENTATION_BACKLOG.md to docs/IMPLEMENTATION_BACKLOG.yaml.
+  verifications:
+    - verification: make test
+      result: 16 tests 0 failures 0 skipped

@@ -1,5 +1,0 @@
-- [x] PORT-0002A: add an 8080 assembler that can ingest `orig/lisp_8080_rawocr_2026-04-13.asm`
-- [x] PORT-0002B: add an 8080 emulator with host monitor hooks and end-to-end Lisp validation
-- [x] PORT-0002C: add instruction-pointer coverage reporting to the 8080 emulator
-- [x] PORT-0002D: add an OCR discrepancy validator for raw vs corrected listings
-- [x] PORT-0002E: add interpreter-focused Lisp validation tests and reference coverage

@@ -1,0 +1,68 @@
+- meta: {_: feature, id: PORT-0002A, status: done, priority: medium, guid: k2a1}
+  title: Add an 8080 assembler that can ingest `orig/lisp_8080_rawocr_2026-04-13.asm`
+  expected_behavior: |
+    The repository should provide an 8080 assembler that can ingest the original
+    OCR listing and reconstruct the flat image needed by local tools and tests.
+  evidence:
+    - evidence: The assembler task was completed and recorded in development log entry a4k7.
+    - evidence: The original backlog tracked PORT-0002A as complete.
+  related:
+    - development_log: a4k7
+
+- meta: {_: feature, id: PORT-0002B, status: done, priority: medium, guid: m4b2}
+  title: Add an 8080 emulator with host monitor hooks and end-to-end Lisp validation
+  expected_behavior: |
+    The repository should provide an 8080 emulator that can execute the Lisp
+    image and patch monitor I/O hooks to host behavior for validation.
+  evidence:
+    - evidence: The emulator and hook task was completed and recorded in development log entry m8t2.
+    - evidence: The original backlog tracked PORT-0002B as complete.
+  related:
+    - development_log: m8t2
+
+- meta: {_: feature, id: PORT-0002C, status: done, priority: medium, guid: n6c3}
+  title: Add instruction-pointer coverage reporting to the 8080 emulator
+  expected_behavior: |
+    The emulator should be able to report instruction-pointer coverage so tests
+    can verify which machine-code addresses were executed.
+  evidence:
+    - evidence: Coverage reporting was completed and recorded in development log entry c7v1.
+    - evidence: The original backlog tracked PORT-0002C as complete.
+  related:
+    - development_log: c7v1
+
+- meta: {_: feature, id: PORT-0002D, status: done, priority: medium, guid: q8d4}
+  title: Add an OCR discrepancy validator for raw vs corrected listings
+  expected_behavior: |
+    The repository should validate discrepancies between the raw OCR listing,
+    the corrected listing, and the provenance ledger.
+  evidence:
+    - evidence: The OCR discrepancy validator was completed and recorded in development log entry q4n8.
+    - evidence: The original backlog tracked PORT-0002D as complete.
+  related:
+    - development_log: q4n8
+
+- meta: {_: feature, id: PORT-0002E, status: done, priority: medium, guid: p2e5}
+  title: Add interpreter-focused Lisp validation tests and reference coverage
+  expected_behavior: |
+    The repository should validate Lisp interpreter behavior directly, using the
+    emulator and host I/O infrastructure, and document the validated behavior.
+  evidence:
+    - evidence: The interpreter-focused test suite was completed and recorded in development log entry p7r4.
+    - evidence: The original backlog tracked PORT-0002E as complete.
+  related:
+    - development_log: p7r4
+
+- meta: {_: docs, id: PORT-0002F, status: done, priority: low, guid: r6f7}
+  title: Implementation backlog metadata should live in YAML
+  expected_behavior: |
+    Implementation backlog items should be tracked in docs/IMPLEMENTATION_BACKLOG.yaml
+    using structured metadata that matches the repository policy.
+  evidence:
+    - evidence: AGENTS.md now specifies docs/IMPLEMENTATION_BACKLOG.yaml and a fixed YAML item format.
+    - evidence: The prior checklist backlog lived in docs/IMPLEMENTATION_BACKLOG.md and did not encode the required fields.
+  acceptance:
+    - acceptance: Convert the existing backlog items into the required YAML structure.
+    - acceptance: Remove the superseded docs/IMPLEMENTATION_BACKLOG.md file.
+  related:
+    - file: AGENTS.md
