@@ -74,8 +74,14 @@ This manual reflects the behavior validated by the current `make test` fixture.
   host `INCH`, `OUTC`, `CRLF`, and `ABEND` behaviors.
 - When `o/i8080emu` is invoked as `o/i8080emu --coverage program.asm`, it emits
   an instruction-pointer coverage report to stderr after execution.
+- When `o/i8080emu` is invoked as
+  `o/i8080emu --coverage-out coverage.ndjson program.asm`, it writes the
+  coverage report to an NDJSON file.
 - Each nonzero coverage line has the form `0xADDR COUNT`, where `COUNT` is how
   many times that address became the instruction pointer for an opcode fetch.
+- Each NDJSON address record includes `kind`, `address`, `address_hex`, and
+  `hits`, and the file ends with a `summary` record containing
+  `covered_addresses` and `total_instruction_fetches`.
 - The report ends with `covered_addresses` and
   `total_instruction_fetches` summary lines.
 - The current automated coverage validates that the original OCR image boots to

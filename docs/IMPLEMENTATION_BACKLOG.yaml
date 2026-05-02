@@ -99,3 +99,15 @@
   notes: |
     Current containment is to avoid asserting non-head ASSOC lookup behavior in
     the automated interpreter suite until the underlying cause is resolved.
+
+- meta: {_: feature, id: PORT-0002I, status: done, priority: medium, guid: i7p3}
+  title: Add an NDJSON coverage output option to the emulator CLI
+  expected_behavior: |
+    The emulator CLI should be able to write instruction-pointer coverage to an
+    NDJSON file so coverage can be collected from non-interactive runs.
+  evidence:
+    - evidence: `o/i8080emu` now accepts `--coverage-out path` and writes per-address and summary NDJSON coverage records.
+    - evidence: `tests/i8080_emu_test.c` invokes the built `o/i8080emu` binary and validates the generated NDJSON coverage file.
+  related:
+    - file: src/i8080emu_main.c
+    - file: tests/i8080_emu_test.c

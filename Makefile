@@ -80,7 +80,7 @@ lisp-cosmo: $(LISP_COSMO)
 
 build: lisp-gcc i8080asm i8080emu ocr-validator
 
-test: lisp-test $(I8080_ASM_TEST) $(I8080_EMU_TEST) $(LISP_INTERPRETER_TEST) $(OCR_VALIDATOR_TEST)
+test: lisp-test $(I8080_EMU) $(I8080_ASM_TEST) $(I8080_EMU_TEST) $(LISP_INTERPRETER_TEST) $(OCR_VALIDATOR_TEST)
 	./$(LISP_TEST)
 	./$(I8080_ASM_TEST)
 	./$(I8080_EMU_TEST)

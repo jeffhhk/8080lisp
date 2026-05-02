@@ -1,6 +1,7 @@
 #include "i8080_asm.h"
 #include "i8080_emu.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -20,6 +21,23 @@ static void host_abend(void *ctx, uint8_t code) {
   fprintf(stderr, "\nABEND 0x%02x\n", code);
 }
 
+static void summarize_coverage(const i8080_coverage *coverage, size_t *covered,
+                               size_t *total) {
+  size_t address;
+
+  *covered = 0;
+  *total = 0;
+
+  for (address = 0; address < I8080_IMAGE_SIZE; ++address) {
+    size_t hits = i8080_coverage_count(coverage, (uint16_t)address);
+    if (hits == 0) {
+      continue;
+    }
+    *covered += 1;
+    *total += hits;
+  }
+}
+
 static void write_coverage_report(FILE *stream, const i8080_coverage *coverage) {
   size_t address;
   size_t covered = 0;
@@ -32,11 +50,81 @@ static void write_coverage_report(FILE *stream, const i8080_coverage *coverage) 
       continue;
     }
     fprintf(stream, "0x%04zx %zu\n", address, hits);
-    covered += 1;
-    total += hits;
   }
+  summarize_coverage(coverage, &covered, &total);
   fprintf(stream, "covered_addresses %zu\n", covered);
   fprintf(stream, "total_instruction_fetches %zu\n", total);
+}
+
+static int write_coverage_ndjson(const char *path,
+                                 const i8080_coverage *coverage) {
+  FILE *stream;
+  size_t address;
+  size_t covered = 0;
+  size_t total = 0;
+
+  stream = fopen(path, "w");
+  if (stream == NULL) {
+    fprintf(stderr, "%s: %s\n", path, strerror(errno));
+    return 0;
+  }
+
+  for (address = 0; address < I8080_IMAGE_SIZE; ++address) {
+    size_t hits = i8080_coverage_count(coverage, (uint16_t)address);
+    if (hits == 0) {
+      continue;
+    }
+    fprintf(stream,
+            "{\"kind\":\"address\",\"address\":%zu,\"address_hex\":"
+            "\"0x%04zx\",\"hits\":%zu}\n",
+            address, address, hits);
+  }
+
+  summarize_coverage(coverage, &covered, &total);
+  fprintf(stream,
+          "{\"kind\":\"summary\",\"covered_addresses\":%zu,"
+          "\"total_instruction_fetches\":%zu}\n",
+          covered, total);
+
+  if (fclose(stream) != 0) {
+    fprintf(stderr, "%s: %s\n", path, strerror(errno));
+    return 0;
+  }
+  return 1;
+}
+
+static int parse_args(int argc, char **argv, int *emit_coverage,
+                      int *capture_coverage,
+                      const char **coverage_out_path,
+                      const char **program_path) {
+  int i;
+
+  *emit_coverage = 0;
+  *capture_coverage = 0;
+  *coverage_out_path = NULL;
+  *program_path = NULL;
+
+  for (i = 1; i < argc; ++i) {
+    if (strcmp(argv[i], "--coverage") == 0) {
+      *emit_coverage = 1;
+      *capture_coverage = 1;
+      continue;
+    }
+    if (strcmp(argv[i], "--coverage-out") == 0) {
+      if (i + 1 >= argc) {
+        return 0;
+      }
+      *capture_coverage = 1;
+      *coverage_out_path = argv[++i];
+      continue;
+    }
+    if (*program_path != NULL) {
+      return 0;
+    }
+    *program_path = argv[i];
+  }
+
+  return *program_path != NULL;
 }
 
 int main(int argc, char **argv) {
@@ -51,15 +139,16 @@ int main(int argc, char **argv) {
       .ctx = NULL,
   };
   const char *program_path = NULL;
+  const char *coverage_out_path = NULL;
+  int capture_coverage = 0;
   int emit_coverage = 0;
 
-  if (argc == 2) {
-    program_path = argv[1];
-  } else if (argc == 3 && strcmp(argv[1], "--coverage") == 0) {
-    emit_coverage = 1;
-    program_path = argv[2];
-  } else {
-    fprintf(stderr, "usage: %s [--coverage] program.asm\n", argv[0]);
+  if (!parse_args(argc, argv, &emit_coverage, &capture_coverage,
+                  &coverage_out_path,
+                  &program_path)) {
+    fprintf(stderr,
+            "usage: %s [--coverage] [--coverage-out path] program.asm\n",
+            argv[0]);
     return 1;
   }
 
@@ -73,7 +162,7 @@ int main(int argc, char **argv) {
   }
 
   i8080_init(&cpu, &hooks);
-  if (emit_coverage) {
+  if (capture_coverage) {
     i8080_coverage_reset(&coverage);
     i8080_set_coverage(&cpu, &coverage);
   }
@@ -81,6 +170,10 @@ int main(int argc, char **argv) {
   i8080_run(&cpu, 10000000);
   if (emit_coverage) {
     write_coverage_report(stderr, &coverage);
+  }
+  if (coverage_out_path != NULL &&
+      !write_coverage_ndjson(coverage_out_path, &coverage)) {
+    return 1;
   }
   if (cpu.error) {
     fprintf(stderr, "\nunsupported opcode 0x%02x at 0x%04x\n", cpu.error_opcode,

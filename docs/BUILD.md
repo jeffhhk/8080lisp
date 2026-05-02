@@ -16,7 +16,11 @@ The emulator binary is written to `o/i8080emu` and assembles then runs an 8080
 program with host-backed `INCH`, `OUTC`, `CRLF`, and `ABEND` monitor hooks.
 Pass `--coverage` before the assembly path to emit an instruction-pointer
 coverage report to stderr after execution. The report lists each executed
-instruction address with its hit count, followed by summary totals.
+instruction address with its hit count, followed by summary totals. Pass
+`--coverage-out path` before the assembly path to write the same run's coverage
+to an NDJSON file. Each nonzero address is written as one `address` record, and
+the file ends with one `summary` record. `--coverage` and `--coverage-out` may
+be used together.
 
 The OCR validator binary is written to `o/ocr_validator`. With no arguments it
 validates `orig/lisp_8080_rawocr_2026-04-13.asm`,
