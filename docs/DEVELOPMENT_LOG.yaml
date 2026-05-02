@@ -742,3 +742,20 @@
       result: confirmed the artifact workflow now downloads cosmocc with retry and resume flags before running make build-cosmo
     - verification: sed -n '1,220p' .github/workflows/release.yml
       result: confirmed the release workflow applies the same retry and resume download path before creating or updating the GitHub Release
+- meta: {_: bug, guid: w8y6}
+  title: Cosmocc download should use the cosmo.zip CI source
+  prompt: |
+    Use https://cosmo.zip/pub/cosmocc/cosmocc-4.0.2.zip as a download source for cosmocc.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 34 tests 0 failures 0 skipped
+    - verification: make build-cosmo
+      result: built the Cosmopolitan targets and packaged o/8080LISP.com
+    - verification: sed -n '1,220p' .github/workflows/cosmo.yml
+      result: confirmed the artifact workflow now downloads cosmocc from cosmo.zip before running make build-cosmo
+    - verification: sed -n '1,220p' .github/workflows/release.yml
+      result: confirmed the release workflow now downloads cosmocc from cosmo.zip before creating or updating the GitHub Release

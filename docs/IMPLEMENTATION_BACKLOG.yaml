@@ -347,3 +347,25 @@
     - task: PORT-0002U
     - file: .github/workflows/cosmo.yml
     - file: .github/workflows/release.yml
+
+- meta: {_: bug, id: PORT-0002W, status: done, priority: medium, guid: w9z7}
+  title: Cosmocc download should use the cosmo.zip CI source
+  expected_behavior: |
+    The CI workflows that install `cosmocc` should fetch the pinned archive from
+    `https://cosmo.zip/pub/cosmocc/` so both the artifact and release pipelines
+    use the intended download source.
+  evidence:
+    - evidence: "`.github/workflows/cosmo.yml` and `.github/workflows/release.yml` previously downloaded `cosmocc-${COSMOCC_VERSION}.zip` from the older `justine.lol/cosmopolitan` URL."
+    - evidence: "Both workflows now fetch `https://cosmo.zip/pub/cosmocc/cosmocc-${COSMOCC_VERSION}.zip` while preserving the same retry, resume, unzip, and `make build-cosmo` behavior."
+    - evidence: "`docs/BUILD.md` now documents `cosmo.zip/pub/cosmocc` as the CI download source."
+  acceptance:
+    - acceptance: Point both CI workflows at the same cosmo.zip archive URL.
+    - acceptance: Preserve the existing tool install location under `$HOME/bin/cosmo`.
+    - acceptance: Preserve the existing `make build-cosmo` packaging path after the download step.
+  related:
+    - task: PORT-0002T
+    - task: PORT-0002U
+    - task: PORT-0002V
+    - file: .github/workflows/cosmo.yml
+    - file: .github/workflows/release.yml
+    - file: docs/BUILD.md
