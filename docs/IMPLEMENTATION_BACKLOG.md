@@ -5,5 +5,11 @@
   `gcc` validation path.
 - [ ] `PORT-0002`: Translate the pair, atom, and allocator core from
   `orig/lisp_8080_rawocr_2026-04-13.asm` onto the scaffolded memory image.
-- [ ] `PORT-0003`: Translate the reader, evaluator, and REPL loop, then extend
-  the fixture so every Lisp primitive is exercised end-to-end.
+- [ ] `PORT-0003`: Translate the reader character helpers, atom capture, and
+  atom interning routines from `orig/lisp_8080_rawocr_2026-04-13.asm`.
+- [ ] `PORT-0004`: Translate the recursive list reader from
+  `orig/lisp_8080_rawocr_2026-04-13.asm`.
+- [ ] `PORT-0005`: Translate the evaluator, apply path, and definition helpers
+  from `orig/lisp_8080_rawocr_2026-04-13.asm`.
+- [ ] `PORT-0006`: Translate the REPL loop and extend the fixture so every Lisp
+  primitive is exercised end-to-end.
