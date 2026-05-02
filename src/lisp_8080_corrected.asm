@@ -379,7 +379,7 @@ PG6 ASSM 0 8000
 02A0 CD 09 F0       0372        CALL OUTC
 02A3 CD 50 00       0373        CALL OUTPUT
 02A6 C9             0374        RET
-02A7 E5             0375 MAKEATOM PUSH H
+02A7 D5             0375 MAKEATOM PUSH D
 02A8 C5             0376        PUSH B
 02A9 F5             0377        PUSH PSW
 02AA EB             0378        XCHG          D->INPUT STRING

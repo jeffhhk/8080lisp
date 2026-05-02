@@ -492,6 +492,35 @@ static void test_cli_null_queries_print_boolean_results(void) {
   expect_text("null query output", output_text, "\n>>T\n>>F");
 }
 
+static void test_cli_car_of_dotted_pair_prints_atom_result(void) {
+  char output_path[128];
+  char command[512];
+  char output_text[1024];
+  int status;
+
+  snprintf(output_path, sizeof(output_path), "/tmp/i8080_car_output_%ld.txt",
+           (long)getpid());
+  snprintf(command, sizeof(command),
+           "printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm > %s",
+           output_path);
+  status = system(command);
+  if (status == -1) {
+    fprintf(stderr, "car query command failed to launch\n");
+    failures += 1;
+    return;
+  }
+  if (!WIFEXITED(status)) {
+    fprintf(stderr, "car query command did not exit cleanly\n");
+    failures += 1;
+    return;
+  }
+  expect_int("car query command exited", WEXITSTATUS(status), 0);
+  if (!read_file_text(output_path, output_text, sizeof(output_text))) {
+    return;
+  }
+  expect_text("car query output", output_text, "\n>>T");
+}
+
 int main(void) {
   test_monitor_hooks_work_in_the_emulator();
   test_instruction_pointer_coverage_counts_executed_addresses();
@@ -502,12 +531,13 @@ int main(void) {
   test_cli_filters_baseline_lines_from_source_display();
   test_cli_evaluates_identity_lambda_of_three_from_stdin();
   test_cli_null_queries_print_boolean_results();
+  test_cli_car_of_dotted_pair_prints_atom_result();
 
   if (failures != 0) {
-    fprintf(stderr, "9 tests %d failures 0 skipped\n", failures);
+    fprintf(stderr, "10 tests %d failures 0 skipped\n", failures);
     return 1;
   }
 
-  puts("9 tests 0 failures 0 skipped");
+  puts("10 tests 0 failures 0 skipped");
   return 0;
 }

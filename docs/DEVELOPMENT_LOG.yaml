@@ -610,3 +610,20 @@
       result: 30 tests 0 failures 0 skipped
     - verification: EMSDK_VERSION=latest ./ensure_emsdk_installed.sh /tmp/8080lisp-emsdk-fix && EMSDK_DIR=/tmp/8080lisp-emsdk-fix EMSDK_VERSION=latest make i8080web && ./ensure_emsdk_uninstalled.sh /tmp/8080lisp-emsdk-fix
       result: installed a temporary emsdk checkout, rebuilt `o/i8080web.html` with the stack fix in place, and removed the temporary checkout afterward
+- meta: {_: bug, guid: c7n5}
+  title: CAR monitor evaluation should print the compact atom result
+  prompt: |
+    Resolve PORT-0002L.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: inject an artificial failure into tests/i8080_emu_test.c and rerun make o/i8080_emu_test && ./o/i8080_emu_test
+      result: the new CLI regression failed with "car query test double check"
+    - verification: inject an artificial failure into tests/lisp_interpreter_test.c and rerun make o/lisp_interpreter_test && ./o/lisp_interpreter_test
+      result: the new parser regression failed with "monitor parser test double check"
+    - verification: remove the artificial failures from tests/i8080_emu_test.c and tests/lisp_interpreter_test.c, then rerun make test
+      result: 32 tests 0 failures 0 skipped
+    - verification: printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
+      result: printed >>T and exited successfully after stdin EOF

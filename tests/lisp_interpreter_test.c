@@ -46,6 +46,10 @@ enum {
   LISP_FN_ASSOC = 0x0116,
   LISP_FN_EVAL = 0x013c,
   LISP_FN_APPLY = 0x0196,
+  LISP_FN_EVALQUOTE = 0x028e,
+  LISP_FN_NEXTCHAR = 0x0348,
+  LISP_FN_INPUT = 0x0354,
+  LISP_FN_TAKEBL = 0x03ed,
   LISP_FN_DEFNE = 0x05ff,
 };
 
@@ -287,6 +291,21 @@ static uint16_t defne_value(lisp_fixture *fixture, uint16_t definitions) {
   return get_hl(&fixture->cpu);
 }
 
+static void parse_monitor_inputs(lisp_fixture *fixture, const char *text,
+                                 uint16_t *fn, uint16_t *args) {
+  lisp_host_set_input(text);
+  call_routine(fixture, LISP_FN_NEXTCHAR);
+  expect_clean_call("nextchar call", fixture);
+  call_routine(fixture, LISP_FN_INPUT);
+  expect_clean_call("first input call", fixture);
+  *fn = get_hl(&fixture->cpu);
+  call_routine(fixture, LISP_FN_TAKEBL);
+  expect_clean_call("takebl call", fixture);
+  call_routine(fixture, LISP_FN_INPUT);
+  expect_clean_call("second input call", fixture);
+  *args = get_hl(&fixture->cpu);
+}
+
 static void expect_coverage_hit(const lisp_fixture *fixture, const char *label,
                                 uint16_t address) {
   if (i8080_coverage_count(&fixture->coverage, address) != 0) {
@@ -442,6 +461,34 @@ static void test_eval_atoms_and_apply_lambda_label(void) {
   expect_coverage_hit(&fixture, "eval coverage from env lookup", LISP_FN_EVAL);
 }
 
+static void test_monitor_input_parses_car_dotted_pair_query(void) {
+  lisp_fixture fixture;
+  uint16_t pair;
+  uint16_t expected_args;
+  uint16_t fn;
+  uint16_t args;
+
+  if (!boot_fixture(&fixture)) {
+    return;
+  }
+
+  pair = cons_value(&fixture, LISP_T_AT, LISP_F_AT);
+  expected_args = cons_value(&fixture, pair, LISP_NIL);
+  parse_monitor_inputs(&fixture, "CAR ((T.F)) \n", &fn, &args);
+
+  expect_u16("monitor fn", fn, LISP_CAR_AT);
+  expect_text("monitor args output", capture_output(&fixture, args), "((T.F))");
+  expect_int("monitor args equal expected",
+             predicate_z_hl_de(&fixture, LISP_FN_EQUAL, args, expected_args), 1);
+
+  set_hl(&fixture.cpu, fn);
+  set_de(&fixture.cpu, args);
+  lisp_host_clear_output();
+  call_routine(&fixture, LISP_FN_EVALQUOTE);
+  expect_clean_call("evalquote call", &fixture);
+  expect_text("monitor evalquote output", lisp_host_output(), "\n>>T");
+}
+
 static void test_definition_routine_updates_global_environment(void) {
   lisp_fixture fixture;
   uint16_t quote_nil;
@@ -476,13 +523,14 @@ int main(void) {
   test_comparison_and_environment_primitives();
   test_eval_quote_cond_and_application_paths();
   test_eval_atoms_and_apply_lambda_label();
+  test_monitor_input_parses_car_dotted_pair_query();
   test_definition_routine_updates_global_environment();
 
   if (failures != 0) {
-    fprintf(stderr, "5 tests %d failures 0 skipped\n", failures);
+    fprintf(stderr, "6 tests %d failures 0 skipped\n", failures);
     return 1;
   }
 
-  puts("5 tests 0 failures 0 skipped");
+  puts("6 tests 0 failures 0 skipped");
   return 0;
 }

@@ -143,27 +143,33 @@
     - file: docs/BUILD.md
     - file: docs/Reference.md
 
-- meta: {_: bug, id: PORT-0002L, status: open, priority: medium, guid: l2c7}
+- meta: {_: bug, id: PORT-0002L, status: done, priority: medium, guid: l2c7}
   title: CAR monitor evaluation should not print corrupted list output
   expected_behavior: |
     Evaluating `CAR ((T.F))` through the monitor CLI should print a compact Lisp
     result rather than a list padded with NUL bytes and repeated structure data.
   evidence:
-    - evidence: "`docs/Reference.md` currently lists `printf 'CAR ((T.F)) \\n' | ./o/i8080emu src/lisp_8080_corrected.asm` as an emulator example."
     - evidence: During PORT-0002K verification, `printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm` printed a long corrupted `>>(((...` result containing many embedded NUL bytes instead of a compact printed value.
     - evidence: Re-running the same query with `--coverage-baseline /tmp/i8080_cov_baseline.ndjson --coverage-source-display-on-exit` reproduced the same corrupted evaluation result before the source coverage header.
+    - evidence: "The corrected image restores `MAKEATOM` to `PUSH D`, so recursive `INPUT` calls preserve `DE` while still passing the atom-text pointer into `ACOMP` via `XCHG`."
+    - evidence: "`tests/lisp_interpreter_test.c` now parses the exact monitor text `CAR ((T.F)) \\n`, verifies that the second `INPUT` call constructs `((T.F))`, and confirms `EVALQUOTE` prints `>>T`."
+    - evidence: "`tests/i8080_emu_test.c` now runs `printf 'CAR ((T.F)) \\n' | ./o/i8080emu src/lisp_8080_corrected.asm` and expects `\\n>>T`."
   acceptance:
     - acceptance: Reproduce the corrupted `CAR ((T.F))` CLI output in an automated test or otherwise disprove it.
     - acceptance: Determine whether the fault is in `EVAL`, `CAR`, or `OUTPUT` path selection and rendering.
     - acceptance: Validate the corrected CLI result for `CAR ((T.F))`.
   related:
     - development_log: t5m1
+    - development_log: c7n5
     - file: docs/Reference.md
+    - file: docs/OCR_CORRECTIONS.yaml
     - file: src/lisp_8080_corrected.asm
     - file: tests/i8080_emu_test.c
+    - file: tests/lisp_interpreter_test.c
   notes: |
-    Current containment is to avoid relying on this query as a correctness
-    example until the evaluator and renderer path are reconciled.
+    Root cause was the prior `MAKEATOM PUSH H` correction, which let fresh atom
+    probes work but clobbered `DE` across recursive `INPUT` calls and built a
+    cyclic structure for dotted-pair monitor arguments.
 
 - meta: {_: feature, id: PORT-0002M, status: done, priority: medium, guid: m3v6}
   title: Add boolean baseline filtering for emulator source coverage display

@@ -36,21 +36,3 @@
   evidence: "The monitor prompt issues MVI A,'>' before two CALL OUTC instructions, so the missing immediate byte must be 0x3E for the prompt to render as >>."
   basis: runtime-behavior
   confidence: high
-- id: OCR-0005
-  line_number: 375
-  address: 0x02a7
-  field: bytes
-  original: "D5"
-  corrected: "E5"
-  evidence: "TAKEATOM leaves the atom-text buffer pointer in HL, and switching MAKEATOM to preserve that register lets fresh atoms such as the stdin token 3 allocate and print correctly."
-  basis: runtime-behavior
-  confidence: medium
-- id: OCR-0006
-  line_number: 375
-  address: 0x02a7
-  field: operand
-  original: "D"
-  corrected: "H"
-  evidence: "MAKEATOM is only called after TAKEATOM, so preserving HL rather than DE matches the live atom-text pointer used by the fresh-atom path."
-  basis: runtime-behavior
-  confidence: medium

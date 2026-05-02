@@ -24,8 +24,8 @@ and the 8080 emulator follows.
   `0x0010`, and `CONS` at `0x0016`.
 - `CONS` allocates cons cells, and `CAR` and `CDR` return the stored links.
 - `ATOM`, `ISLIST`, and `NULL` report their result through the `Z` flag.
-- The monitor-level `NULL` queries currently validated by CLI checks are:
-  `NULL (NIL)` -> `T` and `NULL ((NIL))` -> `F`.
+- The monitor-level queries currently validated by CLI checks are:
+  `NULL (NIL)` -> `T`, `NULL ((NIL))` -> `F`, and `CAR ((T.F))` -> `T`.
 
 ### Equality and printed form
 
@@ -109,6 +109,7 @@ hooks and optional coverage reporting
 #### Examples
 
 - `printf '(LAMBDA (X) X) (3) \n' | ./o/i8080emu src/lisp_8080_corrected.asm`
+- `printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm`
 - `printf 'NULL (NIL) \n' | ./o/i8080emu --coverage-source-display-on-exit src/lisp_8080_corrected.asm`
 
 ## Assembler
