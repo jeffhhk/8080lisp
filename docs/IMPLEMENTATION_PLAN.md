@@ -21,7 +21,7 @@ Port the 8080 lisp implementation to a cosmopolitan binary.
 - Test fixture must test every LISP primitive at least once
 - Test fixtures are free to use C
 
-### Architecture mapping
+### Register Mapping
 
 Use the following register map to translate from 8080 to 8086 registers.
 
@@ -80,6 +80,7 @@ comment on the first translated instruction of that block, or in an immediately 
 comment.
 - If multiple adjacent source comments describe one idea, they may be merged into one nearby block
 comment, but no original comment text may be dropped.
+- Within each comment, translate register names according to Register Mapping.
 - Comment preservation is mandatory completion criteria for each translated routine.
 
 ## Change constraints
