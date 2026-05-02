@@ -39,6 +39,13 @@ Use the following register map to translate from 8080 to 8086 registers.
 | PC               | Program Counter      | IP                | Same concept                           |
 | F                | Flags                | FLAGS             | 8086 has more flags                    |
 
+### Memory mapping
+
+Use the following memory mapping:
+    - The host allocates one native object, lisp_memory, of size 65536 bytes.
+    - Code keeps its base address in r15 while running. Any Lisp address x is interpreted as native
+    address r15 + x.
+
 ### Instruction mapping
 
 Make sure the translated file routines are listed in the same order as in the source file.
