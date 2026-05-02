@@ -41,6 +41,8 @@ Use the following register map to translate from 8080 to 8086 registers.
 
 ### Instruction mapping
 
+Make sure the translated file routines are listed in the same order as in the source file.
+
 Take advantage of overlapping routines, e.g.:
     0000 C3 B6 04       0011 CADDR  CALL CDR
     0003 CD 10 00       0012 CADR   CALL CDR
