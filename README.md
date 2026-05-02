@@ -25,6 +25,10 @@ You can do things like this:
 
 Running `./o/i8080emulisp.com src/lisp_8080_corrected.asm` gives a REPL, but note the eccentric syntax in the commands above.
 
+There is also an optional browser target now: `make i8080web` produces
+`o/i8080web.html`, a standalone page that bundles the compiled emulator and
+`src/lisp_8080_corrected.asm` into one textarea-driven monitor UI.
+
 I also implemented a coverage tool, for using a REPL to browse how the actual code works.  Evaluating a very simple expression has lots of uninteresting coverage, like the reader, etc, so there's a mechanism for taking a baseline and then printing the residual.  Here's what happens if we ask if the list of NIL is NULL (false), and compare it what happens with doing the same for a list of two NILS:
 
     $ printf 'NULL ((NIL)) \n' | ./o/i8080emulisp.com  --coverage-out coverage-baseline.ndjson src/lisp_8080_corrected.asm
@@ -64,4 +68,3 @@ It is preserved in a cosmopolitan binary, which will run on any Mac, Linux or Wi
     unzip o/i8080emulisp.com src/lisp_8080_corrected.asm
 
 Artifacts include the original PDF, and the automatically gathered prompts used to create the project.
-

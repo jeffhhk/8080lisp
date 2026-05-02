@@ -562,3 +562,36 @@
       result: printed >>T from the Cosmopolitan emulator binary on Linux
     - verification: unzip -l o/i8080emu.com | sed -n '1,12p'
       result: listed the embedded source and documentation payload from the packaged Cosmopolitan emulator binary
+- meta: {_: feature, guid: w8k3}
+  title: Add a standalone Emscripten web page target for the corrected Lisp monitor
+  prompt: |
+    Make a secondary target for running
+        ./o/i8080emulisp.com src/lisp_8080_corrected.asm
+    as a standalone web page.
+    Use the following strategy:
+
+        For emscripten compatibility, make a fork of lisp_runtime.S as lisp_runtime_emscripten.c.
+        Make and test two standalone scripts ensure_emsdk_installed.sh and  ensure_emsdk_uninstalled.sh.
+        Write a separate optional build target i8080web incorporating lisp_runtime_emscripten.c.
+        Generate a simple HTML page with a textarea or other terminal widget for input/output.
+        Generate an html page that inlines the compiled i8080emu and lisp_8080_corrected.asm, but not the assembler or source code.
+        Make any necessary refactorings to reuse as much code as possible without breaking the existing code.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: rebuilt the native gcc tools and left the optional web target separate from the default build
+    - verification: make test
+      result: 30 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/i8080_web_test.c and rerun make o/i8080_web_test && ./o/i8080_web_test
+      result: the web smoke test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/i8080_web_test.c and rerun make o/i8080_web_test && ./o/i8080_web_test
+      result: 2 tests 0 failures 0 skipped
+    - verification: EMSDK_VERSION=latest ./ensure_emsdk_installed.sh /tmp/8080lisp-emsdk-check
+      result: installed a temporary emsdk checkout, resolved `latest` to 5.0.7, and reported `emcc` 5.0.7
+    - verification: EMSDK_DIR=/tmp/8080lisp-emsdk-check EMSDK_VERSION=latest make i8080web
+      result: generated `o/i8080web.html` as a 104K standalone page
+    - verification: rg -a -n "Run Monitor Input|textarea|script src=|src/i8080_asm.c|src/lisp_8080_corrected.asm|data:application/octet-stream;base64" o/i8080web.html
+      result: confirmed the generated page contains the textarea UI, embeds the corrected Lisp listing, and does not rely on an external script asset or ship `src/i8080_asm.c`
+    - verification: ./ensure_emsdk_uninstalled.sh /tmp/8080lisp-emsdk-check
+      result: removed the temporary emsdk checkout after the web build verification

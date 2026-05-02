@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>8080 Lisp Web Monitor</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #f7f1e3;
+        --paper-shadow: #eadfc7;
+        --ink: #1f1b16;
+        --accent: #9a3412;
+        --accent-strong: #7c2d12;
+        --panel: rgba(255, 252, 245, 0.86);
+        --border: rgba(63, 36, 18, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua",
+          Georgia, serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top, rgba(154, 52, 18, 0.18), transparent 34%),
+          linear-gradient(180deg, var(--paper) 0%, #efe6d2 100%);
+      }
+
+      main {
+        width: min(1100px, calc(100vw - 2rem));
+        margin: 2rem auto;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        background: var(--panel);
+        box-shadow: 0 24px 80px rgba(63, 36, 18, 0.12);
+        backdrop-filter: blur(8px);
+      }
+
+      h1 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(2rem, 4vw, 3.3rem);
+        line-height: 0.95;
+        letter-spacing: -0.04em;
+      }
+
+      p {
+        margin: 0;
+        max-width: 60ch;
+        line-height: 1.45;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin: 1.5rem 0;
+        align-items: center;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 0.8rem 1.2rem;
+        font: inherit;
+        font-weight: 700;
+        color: #fff7ed;
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.55;
+        cursor: wait;
+      }
+
+      #status {
+        min-height: 1.5rem;
+        color: var(--accent-strong);
+      }
+
+      .panes {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 20rem;
+        resize: vertical;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 1rem;
+        color: #f8fafc;
+        background:
+          linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.98));
+        font: 0.98rem/1.45 "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      }
+
+      .hint {
+        margin-top: 0.75rem;
+        font-size: 0.95rem;
+        color: rgba(31, 27, 22, 0.72);
+      }
+
+      @media (max-width: 820px) {
+        main {
+          width: min(100vw - 1rem, 1100px);
+          margin: 0.5rem auto;
+          padding: 1rem;
+          border-radius: 18px;
+        }
+
+        .panes {
+          grid-template-columns: 1fr;
+        }
+
+        textarea {
+          min-height: 14rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>8080 Lisp Web Monitor</h1>
+      <p>
+        This page runs the corrected 8080 Lisp listing inside the emulator build,
+        with the program and compiled Emscripten payload bundled into one HTML file.
+        Enter one or more monitor expressions, each terminated by a newline.
+      </p>
+      <div class="toolbar">
+        <button id="run-button" disabled>Run Monitor Input</button>
+        <div id="status">Loading runtime…</div>
+      </div>
+      <div class="panes">
+        <div>
+          <label for="input">Input</label>
+          <textarea id="input">NULL (NIL) 
+NULL ((NIL)) 
+</textarea>
+        </div>
+        <div>
+          <label for="output">Output</label>
+          <textarea id="output" readonly></textarea>
+        </div>
+      </div>
+      <div class="hint">
+        Expected starter output for the default input is <code>&gt;&gt;T</code>
+        followed by <code>&gt;&gt;F</code>.
+      </div>
+    </main>
+    <script>
+      const runButton = document.getElementById("run-button");
+      const inputArea = document.getElementById("input");
+      const outputArea = document.getElementById("output");
+      const statusNode = document.getElementById("status");
+
+      function setStatus(text) {
+        statusNode.textContent = text;
+      }
+
+      var Module = {
+        printErr: function(text) {
+          if (text) {
+            setStatus(text);
+          }
+        },
+        onRuntimeInitialized: function() {
+          runButton.disabled = false;
+          setStatus("Runtime ready.");
+        }
+      };
+
+      runButton.addEventListener("click", function() {
+        runButton.disabled = true;
+        setStatus("Running...");
+        try {
+          outputArea.value = Module.ccall(
+            "i8080web_eval",
+            "string",
+            ["string"],
+            [inputArea.value]
+          );
+          setStatus("Run complete.");
+        } finally {
+          runButton.disabled = false;
+        }
+      });
+    </script>
+    {{{ SCRIPT }}}
+  </body>
+</html>

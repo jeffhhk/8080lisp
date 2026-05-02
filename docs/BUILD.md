@@ -4,6 +4,7 @@
 - `make build` builds the default local `gcc` target plus the local `i8080asm`, `i8080emu`, and `ocr_validator` tools
 - `make test` builds and runs the default local `gcc` target
 - `make build-cosmo` runs `make clean` and then rebuilds the shared `build` target with `CC=x86_64-unknown-cosmo-cc`, `BINEXT=.com`, and `PATH` augmented by `$(HOME)/bin/cosmo/bin`
+- `make i8080web` optionally installs an embedded emsdk checkout and emits a standalone `o/i8080web.html` page for the corrected Lisp monitor
 
 The local `gcc` path keeps the existing Linux-native output names under `o/`.
 The Cosmopolitan path emits cross-platform `.com` binaries under `o/`:
@@ -50,3 +51,15 @@ and `o/ocr_validator.com` for `make build-cosmo`. With no arguments it
 validates `orig/lisp_8080_rawocr_2026-04-13.asm`,
 `src/lisp_8080_corrected.asm`, and `docs/OCR_CORRECTIONS.yaml`. It also accepts
 explicit `raw.asm corrected.asm corrections.yaml` paths.
+
+The optional web artifact is written to `o/i8080web.html`. It is built with
+Emscripten as one self-contained HTML file, with the compiled emulator/runtime
+payload and `src/lisp_8080_corrected.asm` bundled into the page. The page uses
+textarea-based input and output so monitor expressions can be pasted into the
+browser without shipping a separate assembler executable or auxiliary assets.
+
+`ensure_emsdk_installed.sh [dir]` bootstraps an emsdk checkout, defaulting to
+`toolchains/emsdk` under the repository root, and `ensure_emsdk_uninstalled.sh
+[dir]` removes that checkout when it is no longer needed. `make i8080web`
+respects `EMSDK_DIR` and `EMSDK_VERSION` overrides when invoking the install
+script and `emcc`.

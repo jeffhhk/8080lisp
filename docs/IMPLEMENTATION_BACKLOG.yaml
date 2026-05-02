@@ -87,8 +87,8 @@
   evidence:
     - evidence: A direct emulator probe during PORT-0002E built the alist ((T.F) (F.T)) using PAIRLIS against the original image.
     - evidence: The corrected listing now moves the recursive `XCHG` and `JMP ASSO2` bytes out of the `CALL CDR` immediate field in `ASSOC`, so the recursive step no longer jumps to `0xC3EB`.
-    - evidence: `tests/lisp_interpreter_test.c` now validates `ASSOC(F, alist) == (F.T)` alongside the head-binding case.
-    - evidence: `tests/i8080_emu_test.c` now validates monitor-level boolean queries, including `NULL (NIL)` -> `T` and `NULL ((NIL))` -> `F`, which depend on non-head `ASSOC` lookups in the assembled-function table.
+    - evidence: "`tests/lisp_interpreter_test.c` now validates `ASSOC(F, alist) == (F.T)` alongside the head-binding case."
+    - evidence: "`tests/i8080_emu_test.c` now validates monitor-level boolean queries, including `NULL (NIL)` -> `T` and `NULL ((NIL))` -> `F`, which depend on non-head `ASSOC` lookups in the assembled-function table."
     - evidence: docs/Reference.md now restores the validated non-head `ASSOC` behavior description.
   acceptance:
     - acceptance: Reproduce the second-binding lookup failure in an automated test or otherwise disprove it.
@@ -107,8 +107,8 @@
     The emulator CLI should be able to write instruction-pointer coverage to an
     NDJSON file so coverage can be collected from non-interactive runs.
   evidence:
-    - evidence: `o/i8080emu` now accepts `--coverage-out path` and writes per-address and summary NDJSON coverage records.
-    - evidence: `tests/i8080_emu_test.c` invokes the built `o/i8080emu` binary and validates the generated NDJSON coverage file.
+    - evidence: "`o/i8080emu` now accepts `--coverage-out path` and writes per-address and summary NDJSON coverage records."
+    - evidence: "`tests/i8080_emu_test.c` invokes the built `o/i8080emu` binary and validates the generated NDJSON coverage file."
   related:
     - file: src/i8080emu_main.c
     - file: tests/i8080_emu_test.c
@@ -119,9 +119,9 @@
     The emulator CLI should be able to print a compressed source view that shows
     only covered program lines, along with their hit counts, after execution.
   evidence:
-    - evidence: `o/i8080emu` now accepts `--coverage-source-display-on-exit` and emits a newline-prefixed `source coverage:` report after program output.
-    - evidence: `src/i8080_asm.c` tracks source-line ownership for assembled bytes so runtime coverage can be aggregated back to source lines.
-    - evidence: `tests/i8080_emu_test.c` validates the newline separator, covered-line rendering, and `...` compression on uncovered gaps.
+    - evidence: "`o/i8080emu` now accepts `--coverage-source-display-on-exit` and emits a newline-prefixed `source coverage:` report after program output."
+    - evidence: "`src/i8080_asm.c` tracks source-line ownership for assembled bytes so runtime coverage can be aggregated back to source lines."
+    - evidence: "`tests/i8080_emu_test.c` validates the newline separator, covered-line rendering, and `...` compression on uncovered gaps."
   related:
     - file: src/i8080_asm.c
     - file: src/i8080_coverage_source_display.c
@@ -135,8 +135,8 @@
     from a completed run before rendering compressed source coverage, so only
     coverage in excess of the baseline is displayed.
   evidence:
-    - evidence: `o/i8080emu` now accepts `--coverage-baseline path` and subtracts baseline address hits before `--coverage-source-display-on-exit` renders source lines.
-    - evidence: `tests/i8080_emu_test.c` writes a baseline NDJSON fixture and validates that baseline-covered lines are omitted while residual covered lines still appear.
+    - evidence: "`o/i8080emu` now accepts `--coverage-baseline path` and subtracts baseline address hits before `--coverage-source-display-on-exit` renders source lines."
+    - evidence: "`tests/i8080_emu_test.c` writes a baseline NDJSON fixture and validates that baseline-covered lines are omitted while residual covered lines still appear."
   related:
     - file: src/i8080emu_main.c
     - file: tests/i8080_emu_test.c
@@ -149,7 +149,7 @@
     Evaluating `CAR ((T.F))` through the monitor CLI should print a compact Lisp
     result rather than a list padded with NUL bytes and repeated structure data.
   evidence:
-    - evidence: `docs/Reference.md` currently lists `printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm` as an emulator example.
+    - evidence: "`docs/Reference.md` currently lists `printf 'CAR ((T.F)) \\n' | ./o/i8080emu src/lisp_8080_corrected.asm` as an emulator example."
     - evidence: During PORT-0002K verification, `printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm` printed a long corrupted `>>(((...` result containing many embedded NUL bytes instead of a compact printed value.
     - evidence: Re-running the same query with `--coverage-baseline /tmp/i8080_cov_baseline.ndjson --coverage-source-display-on-exit` reproduced the same corrupted evaluation result before the source coverage header.
   acceptance:
@@ -172,9 +172,9 @@
     NDJSON baseline while leaving the current run's original counts unchanged on
     the remaining displayed lines.
   evidence:
-    - evidence: `o/i8080emu` now accepts `--coverage-baseline-boolean path` in addition to the existing subtractive `--coverage-baseline path`.
-    - evidence: `src/i8080_coverage_source_display.c` now applies an optional baseline line filter derived from baseline-covered addresses before printing source lines.
-    - evidence: `tests/i8080_emu_test.c` validates that a line with residual hits is still removed entirely when its source line appears in the boolean baseline.
+    - evidence: "`o/i8080emu` now accepts `--coverage-baseline-boolean path` in addition to the existing subtractive `--coverage-baseline path`."
+    - evidence: "`src/i8080_coverage_source_display.c` now applies an optional baseline line filter derived from baseline-covered addresses before printing source lines."
+    - evidence: "`tests/i8080_emu_test.c` validates that a line with residual hits is still removed entirely when its source line appears in the boolean baseline."
   related:
     - file: src/i8080_coverage_source_display.c
     - file: src/i8080emu_main.c
@@ -189,10 +189,31 @@
     executables that remain runnable on Linux and can also be transferred to
     supported MacOS and Windows hosts.
   evidence:
-    - evidence: `Makefile` now parameterizes the executable suffix with `BINEXT` and drives `make build-cosmo` with `BINEXT=.com`.
+    - evidence: "`Makefile` now parameterizes the executable suffix with `BINEXT` and drives `make build-cosmo` with `BINEXT=.com`."
     - evidence: The recursive Cosmopolitan build still uses `x86_64-unknown-cosmo-cc` and now writes `o/lisp_gcc.com`, `o/i8080asm.com`, `o/i8080emu.com`, and `o/ocr_validator.com`.
     - evidence: The emulator packaging step now wraps `o/i8080emu.com` directly, preserving the self-extracting source/documentation payload on the cross-platform artifact.
   related:
     - file: Makefile
     - file: docs/BUILD.md
     - file: docs/IMPLEMENTATION_PLAN.md
+
+- meta: {_: feature, id: PORT-0002O, status: done, priority: medium, guid: o5t8}
+  title: Add a standalone `i8080web` page target for the corrected Lisp monitor
+  expected_behavior: |
+    The repository should be able to build one self-contained browser page that
+    runs the corrected Lisp monitor through the emulator with textarea-based
+    input and output, while keeping the native build and test path intact.
+  evidence:
+    - evidence: "`Makefile` now provides an optional `make i8080web` target and generates `o/lisp_8080_corrected_program.h` from `src/lisp_8080_corrected.asm`."
+    - evidence: "`src/i8080_web_app.c` assembles the embedded corrected listing in memory and runs it through the existing emulator hooks for browser use."
+    - evidence: "`web/i8080web_shell.html` provides the single-page textarea UI and `ensure_emsdk_installed.sh` plus `ensure_emsdk_uninstalled.sh` manage the optional emsdk checkout."
+    - evidence: "`tests/i8080_web_test.c` validates the embedded-page execution path under the native test harness, and `tests/lisp_runtime_test.c` now also runs against `src/lisp_runtime_emscripten.c`."
+  related:
+    - file: Makefile
+    - file: src/i8080_web_app.c
+    - file: src/i8080web_main.c
+    - file: src/lisp_runtime_emscripten.c
+    - file: web/i8080web_shell.html
+    - file: ensure_emsdk_installed.sh
+    - file: ensure_emsdk_uninstalled.sh
+    - file: tests/i8080_web_test.c

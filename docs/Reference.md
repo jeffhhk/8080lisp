@@ -84,6 +84,9 @@ hooks and optional coverage reporting
 - EOF on stdin halts the run cleanly after the current `INCH` request.
 - A CPU step-limit failure reports `step limit reached after N steps`.
 - An unsupported opcode reports `unsupported opcode 0xXX at 0xYYYY`.
+- `make i8080web` optionally emits `o/i8080web.html`, a single-file browser
+  page that bundles the compiled emulator and the corrected Lisp listing behind
+  textarea-based monitor input and output.
 
 #### Options
 
