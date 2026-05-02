@@ -216,3 +216,12 @@
   verifications:
     - verification: make test
       result: 16 tests 0 failures 0 skipped
+- meta: {_: refactor, guid: u6x2}
+  title: Record recent interpreter bugs in the implementation backlog
+  prompt: |
+    Add to IMPLEMENTATION_BACKLOG.yaml any bugs that you still remember from recent commit 60dabf.
+  verifications:
+    - verification: make build
+      result: build target was already up to date
+    - verification: make test
+      result: 16 tests 0 failures 0 skipped

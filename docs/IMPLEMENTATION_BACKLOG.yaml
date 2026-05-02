@@ -52,3 +52,45 @@
     - evidence: The original backlog tracked PORT-0002E as complete.
   related:
     - development_log: p7r4
+
+- meta: {_: bug, id: PORT-0002G, status: open, priority: high, guid: g4m7}
+  title: Corrected Lisp routine labels should match the encoded entry addresses
+  expected_behavior: |
+    Routine labels in the corrected Lisp listing should identify the actual
+    encoded entry addresses that the image uses for direct calls and routine-level
+    validation.
+  evidence:
+    - evidence: During the PORT-0002E interpreter test work, direct execution of CONS behaved correctly only when entered at 0x0016.
+    - evidence: The original image contains CALL sites to 0x0016 for CONS, while the corrected listing presentation makes CONS appear to begin at 0x0013.
+    - evidence: The interpreter tests in tests/lisp_interpreter_test.c had to call the real encoded entry addresses from the assembled image rather than the apparent listing label positions.
+  acceptance:
+    - acceptance: Determine whether the mismatch is a corrected-listing transcription problem, a presentation problem, or a test-assumption problem.
+    - acceptance: Update the corrected listing or supporting tooling so routine labels and encoded entry addresses agree.
+    - acceptance: Keep routine-level tests aligned with the resolved entry-address mapping.
+  related:
+    - development_log: p7r4
+    - file: src/lisp_8080_corrected.asm
+    - file: tests/lisp_interpreter_test.c
+  notes: |
+    Current containment is to trust the encoded call targets in the assembled
+    image when driving direct routine-level tests.
+
+- meta: {_: bug, id: PORT-0002H, status: open, priority: medium, guid: h5n8}
+  title: ASSOC should return a matching non-head binding from PAIRLIS output
+  expected_behavior: |
+    ASSOC should return the matching binding pair even when the requested key is
+    not in the first element of an association list produced by PAIRLIS.
+  evidence:
+    - evidence: A direct emulator probe during PORT-0002E built the alist ((T.F) (F.T)) using PAIRLIS against the original image.
+    - evidence: ASSOC(T, alist) returned (T.F), but ASSOC(F, alist) returned the whole alist instead of the expected (F.T).
+    - evidence: The interpreter test suite was narrowed to validate only the stable head-binding lookup path until this behavior is explained.
+  acceptance:
+    - acceptance: Reproduce the second-binding lookup failure in an automated test or otherwise disprove it.
+    - acceptance: Determine whether the issue is in ASSOC recursion, EQUAL comparison, or the constructed alist shape.
+    - acceptance: Validate correct non-head lookup behavior once the root cause is fixed.
+  related:
+    - development_log: p7r4
+    - file: tests/lisp_interpreter_test.c
+  notes: |
+    Current containment is to avoid asserting non-head ASSOC lookup behavior in
+    the automated interpreter suite until the underlying cause is resolved.
