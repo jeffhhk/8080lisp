@@ -161,8 +161,7 @@ int i8080_write_coverage_source_display(FILE *stream, const char *path,
     if (previous_covered_line != 0 && line_number > previous_covered_line + 1) {
       fputs("...\n", stream);
     }
-    fprintf(stream, "%5zu %7zu | %s\n", line_number, line_hits[line_number],
-            line);
+    fprintf(stream, "%7zu | %s\n", line_hits[line_number], line);
     previous_covered_line = line_number;
   }
 

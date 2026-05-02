@@ -95,8 +95,8 @@ hooks and optional coverage reporting
   ends with one `{"kind":"summary",...}` record.
 - `--coverage-source-display-on-exit` prints a newline-prefixed
   `source coverage:` section to stdout after program output. The display shows
-  only covered source lines with aggregated hit counts and uses `...` to
-  compress uncovered gaps.
+  only covered source lines with aggregated hit counts followed by the original
+  source text, and uses `...` to compress uncovered gaps.
 - `--coverage-baseline path` reads an NDJSON baseline and subtracts its
   per-address hits before rendering `--coverage-source-display-on-exit`.
 - `--coverage-baseline-boolean path` reads an NDJSON baseline and hides every

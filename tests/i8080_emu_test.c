@@ -290,16 +290,18 @@ static void test_cli_displays_compressed_covered_source_on_exit(void) {
   expect_contains("coverage-source-display output prefix", output_text,
                   "A\nsource coverage:\n");
   expect_contains("coverage-source-display line 2", output_text,
-                  "| MVI A,'A'\n");
+                  "      1 | MVI A,'A'\n");
   expect_contains("coverage-source-display line 3", output_text,
-                  "| CALL 0F009H\n");
+                  "      1 | CALL 0F009H\n");
   expect_contains("coverage-source-display line 4", output_text,
-                  "| JMP DONE\n");
+                  "      1 | JMP DONE\n");
   expect_contains("coverage-source-display ellipsis", output_text, "...\n");
   expect_contains("coverage-source-display line 6", output_text,
-                  "| DONE: HLT\n");
+                  "      1 | DONE: HLT\n");
   expect_not_contains("coverage-source-display skipped line", output_text,
                       "| MVI A,'B'\n");
+  expect_not_contains("coverage-source-display old line-number prefix",
+                      output_text, "    2       1 | MVI A,'A'\n");
 }
 
 static void test_cli_subtracts_coverage_baseline_from_source_display(void) {
@@ -360,10 +362,12 @@ static void test_cli_subtracts_coverage_baseline_from_source_display(void) {
   expect_not_contains("coverage-baseline line 3 removed", output_text,
                       "| CALL 0F009H\n");
   expect_contains("coverage-baseline line 4 kept", output_text,
-                  "| JMP DONE\n");
+                  "      1 | JMP DONE\n");
   expect_contains("coverage-baseline line 6 kept", output_text,
-                  "| DONE: HLT\n");
+                  "      1 | DONE: HLT\n");
   expect_contains("coverage-baseline ellipsis", output_text, "...\n");
+  expect_not_contains("coverage-baseline old line-number prefix", output_text,
+                      "    4       1 | JMP DONE\n");
 }
 
 static void test_cli_filters_baseline_lines_from_source_display(void) {
@@ -418,14 +422,16 @@ static void test_cli_filters_baseline_lines_from_source_display(void) {
   expect_contains("coverage-baseline-boolean header", output_text,
                   "\nsource coverage:\n");
   expect_contains("coverage-baseline-boolean line 2 kept", output_text,
-                  "| MVI B,03H\n");
+                  "      1 | MVI B,03H\n");
   expect_contains("coverage-baseline-boolean line 3 kept", output_text,
-                  "| LOOP: DCR B\n");
+                  "      3 | LOOP: DCR B\n");
   expect_not_contains("coverage-baseline-boolean line 4 removed", output_text,
                       "| JNZ LOOP\n");
   expect_contains("coverage-baseline-boolean ellipsis", output_text, "...\n");
   expect_contains("coverage-baseline-boolean line 5 kept", output_text,
-                  "| HLT\n");
+                  "      1 | HLT\n");
+  expect_not_contains("coverage-baseline-boolean old line-number prefix",
+                      output_text, "    2       1 | MVI B,03H\n");
 }
 
 static void test_cli_evaluates_identity_lambda_of_three_from_stdin(void) {
