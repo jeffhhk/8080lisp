@@ -41,7 +41,7 @@ Use the following register map to translate from 8080 to 8086 registers.
 
 ### Memory mapping
 
-Use the following memory mapping:
+Since addresses in the original app are based on 16 bits, but we are running in a 64 bit process, use the following memory mapping:
     - The host allocates one native object, lisp_memory, of size 65536 bytes.
     - Code keeps its base address in r15 while running. Any Lisp address x is interpreted as native
     address r15 + x.
@@ -50,9 +50,22 @@ Use the following memory mapping:
 
 Make sure the translated file routines are listed in the same order as in the source file.
 
-Take advantage of overlapping routines, e.g.:
-    0000 C3 B6 04       0011 CADDR  CALL CDR
-    0003 CD 10 00       0012 CADR   CALL CDR
+Mimic overlapping routines in the original code, example here CDR:
+    0011 CADDR  CALL CDR
+    0012 CADR   CALL CDR
+
+Mimic intermediate entry points in the original code, example here CAR2:
+    0013 CAR    PUSH PSW     SAVE A,F
+    0014 CAR2   MOV  A,M     GET CAR/CDR PTR
+    0015        INX  H
+    0016        MOV  H,M     HL:=CAR(HL)
+    0017        MOV  L,A
+    0018        POP  PSW
+    0019        RET
+    0020 CDR    PUSH PSW
+    0021        INX  H        SKIP CAR PTR
+    0022        INX  H        FOR HL:=CDR(HL)
+    0023        JMP  CAR2
 
 Preserve label names when possible, e.g. CDR:
     000F C9             0020 CDR    PUSH PSW
