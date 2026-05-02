@@ -7,6 +7,7 @@
 - `make i8080web` optionally installs an embedded emsdk checkout and emits a standalone `o/i8080web.html` page for the corrected Lisp monitor
 - pushing to `main` runs `.github/workflows/pages.yml`, which builds `o/i8080web.html`, stages it as `index.html`, and deploys it to GitHub Pages
 - pushing to `main` also runs `.github/workflows/cosmo.yml`, which downloads `cosmocc-4.0.2.zip` into `$(HOME)/bin/cosmo`, runs `make build-cosmo`, and uploads `o/8080LISP.com` as a GitHub Actions artifact
+- pushing a `v*` tag runs `.github/workflows/release.yml`, which installs `cosmocc`, runs `make build-cosmo`, creates or updates the matching GitHub Release, and uploads `o/8080LISP.com` as the release asset
 
 The local `gcc` path keeps the existing Linux-native output names under `o/`.
 The Cosmopolitan path emits cross-platform `.com` binaries under `o/`:
@@ -78,3 +79,10 @@ Makefile expects locally, so the runner installs `cosmocc` under
 `$HOME/bin/cosmo/bin` before invoking `make build-cosmo`. That workflow uploads
 the packaged self-extracting archive from `o/8080LISP.com`; it does not commit
 generated `o/` output.
+
+The release workflow uses the same `make build-cosmo` path, but targets tagged
+releases instead of workflow artifacts. Pushing a tag such as `v1.0.0` creates
+or updates the GitHub Release for that tag and uploads `o/8080LISP.com` with
+replacement semantics, so rerunning the workflow refreshes the attached asset
+instead of failing on an existing upload. `workflow_dispatch` also accepts a
+tag name for backfilling or republishing a release from the Actions UI.

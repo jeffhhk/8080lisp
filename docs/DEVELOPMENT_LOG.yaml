@@ -698,3 +698,19 @@
       result: built the Cosmopolitan targets and packaged o/8080LISP.com
     - verification: sed -n '1,220p' .github/workflows/cosmo.yml
       result: confirmed the workflow installs cosmocc, runs make build-cosmo, and uploads o/8080LISP.com with actions/upload-artifact@v4
+- meta: {_: feature, guid: u3r8}
+  title: Publish the Cosmopolitan archive to GitHub Releases
+  prompt: |
+    Add a release workflow that creates or updates a GitHub Release and attaches
+    8080LISP.com.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 34 tests 0 failures 0 skipped
+    - verification: make build-cosmo
+      result: built the Cosmopolitan targets and packaged o/8080LISP.com
+    - verification: sed -n '1,220p' .github/workflows/release.yml
+      result: confirmed the workflow resolves a release tag, installs cosmocc, runs make build-cosmo, creates or updates the matching GitHub Release, and uploads o/8080LISP.com with gh release upload --clobber

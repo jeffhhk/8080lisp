@@ -1,0 +1,65 @@
+name: Publish Release Artifact
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to create or update
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      COSMOCC_VERSION: 4.0.2
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Resolve release tag
+        id: resolve_tag
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          if [ -n "$INPUT_TAG" ]; then
+            release_tag="$INPUT_TAG"
+          else
+            release_tag="${GITHUB_REF_NAME}"
+          fi
+          printf 'release_tag=%s\n' "$release_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Install cosmocc
+        run: |
+          mkdir -p "$HOME/bin/cosmo"
+          curl -fsSL "https://justine.lol/cosmopolitan/cosmocc-${COSMOCC_VERSION}.zip" -o /tmp/cosmocc.zip
+          unzip -oq /tmp/cosmocc.zip -d "$HOME/bin/cosmo"
+          "$HOME/bin/cosmo/bin/x86_64-unknown-cosmo-cc" --version
+
+      - name: Build release archive
+        run: make build-cosmo
+
+      - name: Create or update GitHub Release
+        env:
+          RELEASE_TAG: ${{ steps.resolve_tag.outputs.release_tag }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" --title "$RELEASE_TAG"
+          else
+            gh release create "$RELEASE_TAG" \
+              --title "$RELEASE_TAG" \
+              --target "$GITHUB_SHA" \
+              --generate-notes
+          fi
+
+      - name: Upload 8080LISP.com to GitHub Release
+        env:
+          RELEASE_TAG: ${{ steps.resolve_tag.outputs.release_tag }}
+        run: gh release upload "$RELEASE_TAG" o/8080LISP.com --clobber

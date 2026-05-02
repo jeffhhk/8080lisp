@@ -311,3 +311,19 @@
     - task: PORT-0002N
     - file: .github/workflows/cosmo.yml
     - file: docs/BUILD.md
+
+- meta: {_: feature, id: PORT-0002U, status: done, priority: medium, guid: u9v3}
+  title: Publish the Cosmopolitan archive to GitHub Releases
+  expected_behavior: |
+    Pushing a release tag should trigger a GitHub Actions workflow that builds
+    `o/8080LISP.com`, creates or updates the matching GitHub Release, and
+    attaches the packaged archive as a release asset.
+  evidence:
+    - evidence: "`.github/workflows/release.yml` triggers on `v*` tag pushes and on manual dispatch with a required tag input."
+    - evidence: "The workflow installs `cosmocc-4.0.2.zip`, runs `make build-cosmo`, then uses the GitHub CLI to create the release when absent or edit the existing one when present."
+    - evidence: "`gh release upload --clobber` publishes `o/8080LISP.com` with replace-in-place behavior so reruns update the same release asset."
+    - evidence: "`docs/BUILD.md` now documents both the tag-based trigger and the manual backfill path for release publication."
+  related:
+    - task: PORT-0002T
+    - file: .github/workflows/release.yml
+    - file: docs/BUILD.md
