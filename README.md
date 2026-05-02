@@ -2,6 +2,8 @@
 
 Reanimation of "A LISP Interpreter for the 8080", Darrel Van Buer, Dr. Dobb's Journal of Computer Calisthenics & Orthodontia, Vol 3 Number 30 (Nov 1978).
 
+[In-browser demo](https://jeffhhk.github.io/8080lisp/)
+
 # Historical Background
 
 The IBM PC would not come out for nearly 3 more years, (Aug 1981).  Because there was no standard keyboard/screen setup, the user had to supply 3 routines: INCH, OUTC, CRLF.
