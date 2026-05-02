@@ -90,7 +90,7 @@ Never ask for permission to `git rm` or `git rm -rf`.
         where:
             <kind> is one of: feature/bug/refactor
             <num> (optional) a small integer.  Omit for new changes.
-            <guid> four random characters of the class [a-z0-9]
+            <guid> A stable ID for the change.  Four random characters of the class [a-z0-9].
             <title> is a one line title.  Phrase bugs with the word "should"
             <prompt> is the original prompt used, if available
             <verifications> is a list of verifications performed
@@ -130,7 +130,7 @@ Never ask for permission to `git rm` or `git rm -rf`.
                   <notes>
         where:
             <kind> is one of: bug/feature/refactor/test/docs/investigation
-            <task id> is a stable task identifier such as PORT-0002E
+            <task id> An stable ID for the task.  Four random characters of the class [a-z0-9].
             <status> is one of: open/in_progress/blocked/done/wont_fix
             <priority> is one of: high/medium/low
             <guid> four random characters of the class [a-z0-9]
