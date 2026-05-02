@@ -87,6 +87,33 @@ static void test_monitor_hooks_work_in_the_emulator(void) {
   expect_int("hook abend code", abend_code, 'Z');
 }
 
+static void test_instruction_pointer_coverage_counts_executed_addresses(void) {
+  static const char *program =
+      "ORG 0000H\n"
+      "MVI B,03H\n"
+      "LOOP: DCR B\n"
+      "JNZ LOOP\n"
+      "HLT\n";
+  i8080_image image;
+  i8080_asm_error error;
+  i8080_cpu cpu;
+  i8080_coverage coverage;
+  uint8_t abend_code = 0;
+
+  expect_int("assemble coverage test",
+             i8080_assemble_text("coverage", program, &image, &error), 1);
+
+  load_program(&cpu, &image, &abend_code);
+  i8080_coverage_reset(&coverage);
+  i8080_set_coverage(&cpu, &coverage);
+  expect_int("coverage run", i8080_run(&cpu, 32), 1);
+  expect_int("coverage pc 0000", (int)i8080_coverage_count(&coverage, 0x0000), 1);
+  expect_int("coverage pc 0001", (int)i8080_coverage_count(&coverage, 0x0001), 0);
+  expect_int("coverage pc 0002", (int)i8080_coverage_count(&coverage, 0x0002), 3);
+  expect_int("coverage pc 0003", (int)i8080_coverage_count(&coverage, 0x0003), 3);
+  expect_int("coverage pc 0006", (int)i8080_coverage_count(&coverage, 0x0006), 1);
+}
+
 static void test_original_image_boots_to_the_monitor_loop(void) {
   i8080_image image;
   i8080_asm_error error;
@@ -111,13 +138,14 @@ static void test_original_image_boots_to_the_monitor_loop(void) {
 
 int main(void) {
   test_monitor_hooks_work_in_the_emulator();
+  test_instruction_pointer_coverage_counts_executed_addresses();
   test_original_image_boots_to_the_monitor_loop();
 
   if (failures != 0) {
-    fprintf(stderr, "2 tests %d failures 0 skipped\n", failures);
+    fprintf(stderr, "3 tests %d failures 0 skipped\n", failures);
     return 1;
   }
 
-  puts("2 tests 0 failures 0 skipped");
+  puts("3 tests 0 failures 0 skipped");
   return 0;
 }

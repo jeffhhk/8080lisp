@@ -14,3 +14,6 @@ either clean 8080 source or the OCR listing format used by
 
 The emulator binary is written to `o/i8080emu` and assembles then runs an 8080
 program with host-backed `INCH`, `OUTC`, `CRLF`, and `ABEND` monitor hooks.
+Pass `--coverage` before the assembly path to emit an instruction-pointer
+coverage report to stderr after execution. The report lists each executed
+instruction address with its hit count, followed by summary totals.

@@ -102,3 +102,18 @@
       result: 6 tests 0 failures 0 skipped
     - verification: printf 'ATOM (T) \\n' | ./o/i8080emu orig/lisp_8080_rawocr_2026-04-13.asm
       result: invoked the emulator against the original OCR image with host monitor hooks active
+- meta: {_: feature, guid: c7v1}
+  title: Add instruction-pointer coverage reporting to the 8080 emulator
+  prompt: |
+    Modify the emulator to allow collection of a machine instruction by instruction coverage report.  Count how many times each address became the instruction pointer IP.
+  verifications:
+    - verification: make build
+      result: built o/i8080emu with coverage reporting support
+    - verification: make test
+      result: 7 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/i8080_emu_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/i8080_emu_test.c and rerun make test
+      result: 7 tests 0 failures 0 skipped
+    - verification: ./o/i8080emu --coverage /tmp/i8080_coverage_fixture.asm
+      result: emitted 0x0000 1 with covered_addresses 1 and total_instruction_fetches 1

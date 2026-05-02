@@ -25,6 +25,10 @@ typedef struct {
 } i8080_hooks;
 
 typedef struct {
+  size_t ip_hits[I8080_IMAGE_SIZE];
+} i8080_coverage;
+
+typedef struct {
   uint8_t z;
   uint8_t s;
   uint8_t p;
@@ -48,6 +52,7 @@ typedef struct {
   uint8_t error_opcode;
   uint8_t abend_code;
   size_t steps;
+  i8080_coverage *coverage;
   i8080_flags flags;
   i8080_hooks hooks;
   uint8_t memory[I8080_IMAGE_SIZE];
@@ -55,6 +60,9 @@ typedef struct {
 
 void i8080_init(i8080_cpu *cpu, const i8080_hooks *hooks);
 void i8080_load_image(i8080_cpu *cpu, const i8080_image *image);
+void i8080_coverage_reset(i8080_coverage *coverage);
+void i8080_set_coverage(i8080_cpu *cpu, i8080_coverage *coverage);
+size_t i8080_coverage_count(const i8080_coverage *coverage, uint16_t address);
 int i8080_step(i8080_cpu *cpu);
 int i8080_run(i8080_cpu *cpu, size_t max_steps);
 

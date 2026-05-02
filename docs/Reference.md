@@ -29,5 +29,11 @@ This manual reflects the behavior validated by the current `make test` fixture.
   Lisp image and the local hook fixture.
 - `CALL 0xF006`, `CALL 0xF009`, `CALL 0xF021`, and `CALL 0xF000` are patched to
   host `INCH`, `OUTC`, `CRLF`, and `ABEND` behaviors.
+- When `o/i8080emu` is invoked as `o/i8080emu --coverage program.asm`, it emits
+  an instruction-pointer coverage report to stderr after execution.
+- Each nonzero coverage line has the form `0xADDR COUNT`, where `COUNT` is how
+  many times that address became the instruction pointer for an opcode fetch.
+- The report ends with `covered_addresses` and
+  `total_instruction_fetches` summary lines.
 - The current automated coverage validates that the original OCR image boots to
   its monitor loop at `0x0599` without unsupported-opcode faults.

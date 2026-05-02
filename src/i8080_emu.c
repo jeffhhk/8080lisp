@@ -203,6 +203,24 @@ void i8080_load_image(i8080_cpu *cpu, const i8080_image *image) {
   }
 }
 
+void i8080_coverage_reset(i8080_coverage *coverage) {
+  if (coverage == NULL) {
+    return;
+  }
+  memset(coverage, 0, sizeof(*coverage));
+}
+
+void i8080_set_coverage(i8080_cpu *cpu, i8080_coverage *coverage) {
+  cpu->coverage = coverage;
+}
+
+size_t i8080_coverage_count(const i8080_coverage *coverage, uint16_t address) {
+  if (coverage == NULL) {
+    return 0;
+  }
+  return coverage->ip_hits[address];
+}
+
 int i8080_step(i8080_cpu *cpu) {
   uint8_t opcode;
   cpu->steps += 1;
@@ -214,6 +232,9 @@ int i8080_step(i8080_cpu *cpu) {
     return I8080_STEP_STOPPED;
   }
 
+  if (cpu->coverage != NULL) {
+    cpu->coverage->ip_hits[cpu->pc] += 1;
+  }
   opcode = read_mem(cpu, cpu->pc++);
 
   if ((opcode & 0xc0) == 0x40 && opcode != 0x76) {
