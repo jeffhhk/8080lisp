@@ -759,3 +759,18 @@
       result: confirmed the artifact workflow now downloads cosmocc from cosmo.zip before running make build-cosmo
     - verification: sed -n '1,220p' .github/workflows/release.yml
       result: confirmed the release workflow now downloads cosmocc from cosmo.zip before creating or updating the GitHub Release
+- meta: {_: bug, guid: x2z4}
+  title: Local Cosmopolitan builds should explain missing compiler setup
+  prompt: |
+    Will the GA build be able to find cosmocc in its path?  It's ok if the local path will have to get ~/bin/cosmo/bin/cosmocc into the path, so long as there is a descriptive information when cosmocc is not on the path.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 34 tests 0 failures 0 skipped
+    - verification: make build-cosmo
+      result: built the Cosmopolitan targets and packaged o/8080LISP.com
+    - verification: make build-cosmo COSMO_PATH=/tmp/8080lisp-missing-cosmo COSMO_CC=missing-cosmocc
+      result: failed early with an explicit message naming the missing compiler and suggesting ~/bin/cosmo/bin plus COSMO_PATH / COSMO_CC overrides

@@ -123,6 +123,12 @@ build: lisp-gcc i8080asm i8080emu ocr-validator
 
 build-cosmo:
 	$(MAKE) clean
+	@sh -lc 'PATH="$$PATH:$(COSMO_PATH)"; \
+		if ! command -v "$(COSMO_CC)" >/dev/null 2>&1; then \
+			echo "error: $(COSMO_CC) was not found in PATH after appending $(COSMO_PATH)" >&2; \
+			echo "hint: install cosmocc under ~/bin/cosmo/bin, or override COSMO_PATH / COSMO_CC when running make build-cosmo" >&2; \
+			exit 1; \
+		fi'
 	env PATH="$$PATH:$(COSMO_PATH)" $(MAKE) build-cosmo-inner CC=$(COSMO_CC) BINEXT=$(COSMO_BINEXT)
 
 build-cosmo-inner: build package-cosmo

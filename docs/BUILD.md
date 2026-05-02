@@ -81,6 +81,11 @@ Makefile expects locally, so the runner downloads `cosmocc` from
 the packaged self-extracting archive from `o/8080LISP.com`; it does not commit
 generated `o/` output.
 
+Locally, `make build-cosmo` now checks whether `x86_64-unknown-cosmo-cc` is
+resolvable after appending `$(HOME)/bin/cosmo/bin` to `PATH`. If not, it stops
+with a descriptive error that points to the expected install location and
+reminds you that `COSMO_PATH` and `COSMO_CC` can be overridden.
+
 The release workflow uses the same `make build-cosmo` path, but targets tagged
 releases instead of workflow artifacts. Pushing a tag such as `v1.0.0` creates
 or updates the GitHub Release for that tag and uploads `o/8080LISP.com` with

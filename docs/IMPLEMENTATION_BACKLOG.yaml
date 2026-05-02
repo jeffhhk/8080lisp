@@ -369,3 +369,24 @@
     - file: .github/workflows/cosmo.yml
     - file: .github/workflows/release.yml
     - file: docs/BUILD.md
+
+- meta: {_: bug, id: PORT-0002X, status: done, priority: medium, guid: x4a6}
+  title: Local Cosmopolitan builds should explain missing compiler setup
+  expected_behavior: |
+    Running `make build-cosmo` without a resolvable `cosmocc` compiler should
+    fail early with a descriptive setup message instead of a generic shell
+    command-not-found error.
+  evidence:
+    - evidence: "The GitHub Actions workflows already install `cosmocc` under `$HOME/bin/cosmo/bin`, and `make build-cosmo` appends `$(COSMO_PATH)` before invoking the nested build."
+    - evidence: "Before this change, the local Makefile path relied on the nested compile commands to fail later if `x86_64-unknown-cosmo-cc` was still missing."
+    - evidence: "`Makefile` now checks for `$(COSMO_CC)` immediately after appending `$(COSMO_PATH)` and prints a message that points to `~/bin/cosmo/bin` and the `COSMO_PATH` / `COSMO_CC` overrides."
+  acceptance:
+    - acceptance: Keep the existing GitHub Actions and local install location assumptions unchanged.
+    - acceptance: Detect a missing Cosmopolitan compiler before the nested build starts.
+    - acceptance: Print a clear remediation message for local users.
+  related:
+    - task: PORT-0002T
+    - task: PORT-0002U
+    - task: PORT-0002W
+    - file: Makefile
+    - file: docs/BUILD.md
