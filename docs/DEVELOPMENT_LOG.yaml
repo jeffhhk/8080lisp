@@ -117,3 +117,60 @@
       result: 7 tests 0 failures 0 skipped
     - verification: ./o/i8080emu --coverage /tmp/i8080_coverage_fixture.asm
       result: emitted 0x0000 1 with covered_addresses 1 and total_instruction_fetches 1
+- meta: {_: feature, guid: q4n8}
+  title: Add an OCR discrepancy validator for raw and corrected listings
+  prompt: |
+    Add a validator tool:
+
+      Read AGENTS.md and docs/IMPLEMENTATION_PLAN.md first.
+
+      Keep orig/lisp_8080_rawocr_2026-04-13.asm unchanged. Add infrastructure for OCR discrepancy
+      traceability without correcting the listing yet.
+
+      Implement a tool that ingests:
+
+      - orig/lisp_8080_rawocr_2026-04-13.asm as the raw listing
+      - src/lisp_8080_corrected.asm as the corrected listing
+      - docs/OCR_CORRECTIONS.yaml as the provenance ledger
+
+      The tool must validate that every field-level discrepancy between the raw and corrected listings is
+      accounted for in the provenance ledger, and that every provenance entry corresponds to an actual
+      discrepancy.
+
+      Support at least these provenance fields:
+
+      - id
+      - line_number
+      - address
+      - field with values such as bytes, label, mnemonic, operand, comment, whole_line
+      - original
+      - corrected
+      - evidence
+      - basis
+      - confidence
+
+      Requirements:
+
+      - the validator must compare raw vs corrected listing at field granularity, not just whole-line text
+      - the validator must fail on unaccounted discrepancies
+      - the validator must fail on stale provenance entries that do not match any discrepancy
+      - add automated tests for the validator
+      - do not introduce any OCR corrections in this change beyond the minimum fixture data needed to test
+        the tool
+      - if needed, create placeholder src/lisp_8080_corrected.asm and docs/OCR_CORRECTIONS.yaml with
+        minimal content suitable for testing
+
+      Follow all repo policies.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 11 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/ocr_validator_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/ocr_validator_test.c and rerun make test
+      result: 11 tests 0 failures 0 skipped
+    - verification: ./o/ocr_validator
+      result: validated orig/lisp_8080_rawocr_2026-04-13.asm against src/lisp_8080_corrected.asm and docs/OCR_CORRECTIONS.yaml

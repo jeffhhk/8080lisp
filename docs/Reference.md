@@ -23,6 +23,17 @@ This manual reflects the behavior validated by the current `make test` fixture.
   tests: `ORG`, `EQU`, `DB`, `DW`, `DS`, labels, and the 8080 opcodes exercised
   by the new fixture.
 
+## OCR Validator
+
+- `o/ocr_validator` compares the raw OCR listing, the corrected listing, and the
+  provenance ledger at field granularity.
+- The validator recognizes discrepancies in `bytes`, `label`, `mnemonic`,
+  `operand`, `comment`, and `whole_line`.
+- Validation fails if a raw-vs-corrected discrepancy is missing from
+  `docs/OCR_CORRECTIONS.yaml`.
+- Validation also fails if a provenance entry does not match any current
+  discrepancy.
+
 ## Emulator
 
 - `o/i8080emu` emulates the 8080 instruction subset exercised by the current

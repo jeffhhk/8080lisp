@@ -2,9 +2,11 @@ COSMOCC := $(HOME)/bin/cosmo/bin/cosmocc
 CC := gcc
 CFLAGS := -O2 -Wall -Wextra -std=c11 -Isrc -Itests
 BUILD_DIR := o
+LISTING_SRCS := src/i8080_listing.c
 RUNTIME_SRCS := src/lisp_runtime.S
-ASM_SRCS := src/i8080_asm.c
+ASM_SRCS := src/i8080_asm.c $(LISTING_SRCS)
 EMU_SRCS := src/i8080_emu.c
+OCR_VALIDATOR_SRCS := src/ocr_validator.c $(LISTING_SRCS)
 HOST_IO_SRCS := tests/lisp_host_io.c
 MAIN_SRC := tests/lisp_main.c
 TEST_SRC := tests/lisp_runtime_test.c
@@ -12,15 +14,19 @@ ASM_MAIN_SRC := src/i8080asm_main.c
 ASM_TEST_SRC := tests/i8080_asm_test.c
 EMU_MAIN_SRC := src/i8080emu_main.c
 EMU_TEST_SRC := tests/i8080_emu_test.c
+OCR_VALIDATOR_MAIN_SRC := src/ocr_validator_main.c
+OCR_VALIDATOR_TEST_SRC := tests/ocr_validator_test.c
 LISP_GCC := $(BUILD_DIR)/lisp_gcc
 LISP_TEST := $(BUILD_DIR)/lisp_test
 I8080_ASM := $(BUILD_DIR)/i8080asm
 I8080_ASM_TEST := $(BUILD_DIR)/i8080_asm_test
 I8080_EMU := $(BUILD_DIR)/i8080emu
 I8080_EMU_TEST := $(BUILD_DIR)/i8080_emu_test
+OCR_VALIDATOR := $(BUILD_DIR)/ocr_validator
+OCR_VALIDATOR_TEST := $(BUILD_DIR)/ocr_validator_test
 LISP_COSMO := $(BUILD_DIR)/lisp_cosmo.com
 
-.PHONY: clean build test lisp-gcc lisp-test lisp-cosmo i8080asm i8080emu
+.PHONY: clean build test lisp-gcc lisp-test lisp-cosmo i8080asm i8080emu ocr-validator
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -46,6 +52,12 @@ $(I8080_EMU): $(ASM_SRCS) $(EMU_SRCS) $(EMU_MAIN_SRC) | $(BUILD_DIR)
 $(I8080_EMU_TEST): $(ASM_SRCS) $(EMU_SRCS) $(HOST_IO_SRCS) $(EMU_TEST_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ $(ASM_SRCS) $(EMU_SRCS) $(HOST_IO_SRCS) $(EMU_TEST_SRC)
 
+$(OCR_VALIDATOR): $(OCR_VALIDATOR_SRCS) $(OCR_VALIDATOR_MAIN_SRC) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $(OCR_VALIDATOR_SRCS) $(OCR_VALIDATOR_MAIN_SRC)
+
+$(OCR_VALIDATOR_TEST): $(OCR_VALIDATOR_SRCS) $(OCR_VALIDATOR_TEST_SRC) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $(OCR_VALIDATOR_SRCS) $(OCR_VALIDATOR_TEST_SRC)
+
 $(LISP_COSMO): $(RUNTIME_SRCS) $(HOST_IO_SRCS) $(MAIN_SRC) | $(BUILD_DIR)
 	$(COSMOCC) -O2 -Wall -Wextra -Isrc -Itests -o $@ $(RUNTIME_SRCS) $(HOST_IO_SRCS) $(MAIN_SRC)
 
@@ -57,11 +69,14 @@ i8080asm: $(I8080_ASM)
 
 i8080emu: $(I8080_EMU)
 
+ocr-validator: $(OCR_VALIDATOR)
+
 lisp-cosmo: $(LISP_COSMO)
 
-build: lisp-gcc i8080asm i8080emu
+build: lisp-gcc i8080asm i8080emu ocr-validator
 
-test: lisp-test $(I8080_ASM_TEST) $(I8080_EMU_TEST)
+test: lisp-test $(I8080_ASM_TEST) $(I8080_EMU_TEST) $(OCR_VALIDATOR_TEST)
 	./$(LISP_TEST)
 	./$(I8080_ASM_TEST)
 	./$(I8080_EMU_TEST)
+	./$(OCR_VALIDATOR_TEST)

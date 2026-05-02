@@ -1,4 +1,5 @@
 #include "i8080_asm.h"
+#include "i8080_listing.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -68,19 +69,6 @@ void i8080_image_init(i8080_image *image) {
 
 size_t i8080_image_size(const i8080_image *image) {
   return (size_t)(image->limit - image->origin);
-}
-
-static int is_hex_word(const char *text, size_t len) {
-  size_t i;
-  if (len == 0) {
-    return 0;
-  }
-  for (i = 0; i < len; ++i) {
-    if (!isxdigit((unsigned char)text[i])) {
-      return 0;
-    }
-  }
-  return 1;
 }
 
 static void trim(char *text) {
@@ -793,67 +781,6 @@ static int parse_statement(char *source, char *label, size_t label_size,
   return 1;
 }
 
-static int parse_listing_record(const char *line, int *has_address,
-                                uint16_t *address, uint8_t *bytes,
-                                size_t *byte_count, char *source,
-                                size_t source_size) {
-  const char *cursor = line;
-  char token[64];
-  *has_address = 0;
-  *byte_count = 0;
-  source[0] = '\0';
-
-  while (isspace((unsigned char)*cursor)) {
-    cursor += 1;
-  }
-  if (!is_hex_word(cursor, 4)) {
-    return 0;
-  }
-  memcpy(token, cursor, 4);
-  token[4] = '\0';
-  *address = (uint16_t)strtoul(token, NULL, 16);
-  *has_address = 1;
-  cursor += 4;
-
-  for (;;) {
-    size_t tok_len = 0;
-
-    while (*cursor == ' ') {
-      cursor += 1;
-    }
-    while (cursor[tok_len] != '\0' && !isspace((unsigned char)cursor[tok_len])) {
-      tok_len += 1;
-    }
-    if (tok_len == 4 && isdigit((unsigned char)cursor[0]) &&
-        isdigit((unsigned char)cursor[1]) && isdigit((unsigned char)cursor[2]) &&
-        isdigit((unsigned char)cursor[3])) {
-      cursor += 4;
-      break;
-    }
-    if (tok_len != 2 || !is_hex_word(cursor, 2)) {
-      break;
-    }
-    if (*byte_count >= 8) {
-      return 0;
-    }
-    memcpy(token, cursor, 2);
-    token[2] = '\0';
-    bytes[*byte_count] = (uint8_t)strtoul(token, NULL, 16);
-    *byte_count += 1;
-    cursor += 2;
-  }
-
-  while (isspace((unsigned char)*cursor)) {
-    cursor += 1;
-  }
-  while (isspace((unsigned char)*cursor)) {
-    cursor += 1;
-  }
-  snprintf(source, source_size, "%s", cursor);
-  trim(source);
-  return 1;
-}
-
 static int assemble_text_internal(assembler *state, i8080_image *image,
                                   i8080_asm_error *error) {
   int pass;
@@ -953,43 +880,6 @@ static int assemble_text_internal(assembler *state, i8080_image *image,
   return 1;
 }
 
-static int looks_like_listing(const char *text) {
-  int checked = 0;
-  while (*text != '\0' && checked < 32) {
-    uint16_t address = 0;
-    uint8_t bytes[8];
-    size_t byte_count = 0;
-    char source[256];
-    int has_address = 0;
-    const char *line_end = strchr(text, '\n');
-    char line[256];
-    size_t len;
-
-    if (line_end == NULL) {
-      len = strlen(text);
-    } else {
-      len = (size_t)(line_end - text);
-    }
-    if (len >= sizeof(line)) {
-      len = sizeof(line) - 1;
-    }
-    memcpy(line, text, len);
-    line[len] = '\0';
-
-    if (parse_listing_record(line, &has_address, &address, bytes, &byte_count,
-                             source, sizeof(source))) {
-      return 1;
-    }
-
-    checked += 1;
-    if (line_end == NULL) {
-      break;
-    }
-    text = line_end + 1;
-  }
-  return 0;
-}
-
 static int assemble_listing(const char *text, i8080_image *image,
                             i8080_asm_error *error) {
   char *content = dup_text(text);
@@ -1006,33 +896,29 @@ static int assemble_listing(const char *text, i8080_image *image,
 
   cursor = content;
   while ((line = next_line(&cursor)) != NULL) {
-    uint16_t address = 0;
-    uint8_t bytes[8];
-    size_t byte_count = 0;
-    char source[256];
-    int has_address = 0;
+    i8080_listing_record record;
 
     line_number += 1;
-    if (!parse_listing_record(line, &has_address, &address, bytes, &byte_count,
-                              source, sizeof(source))) {
+    if (!i8080_parse_listing_record(line, &record)) {
       continue;
     }
 
-    if (byte_count != 0) {
+    if (record.byte_count != 0) {
       size_t i;
-      for (i = 0; i < byte_count; ++i) {
-        write_byte(image, (uint16_t)(address + i), bytes[i]);
+      for (i = 0; i < record.byte_count; ++i) {
+        write_byte(image, (uint16_t)(record.address + i), record.bytes[i]);
       }
       continue;
     }
 
-    if (source[0] != '\0') {
+    if (record.source[0] != '\0') {
       char label[64];
       char opcode[64];
       char operand_text[256];
       char operands[8][64];
 
-      if (!parse_statement(source, label, sizeof(label), opcode, sizeof(opcode),
+      if (!parse_statement(record.source, label, sizeof(label), opcode,
+                           sizeof(opcode),
                            operand_text, sizeof(operand_text))) {
         continue;
       }
@@ -1045,7 +931,7 @@ static int assemble_listing(const char *text, i8080_image *image,
           return 0;
         }
         while (value-- > 0) {
-          write_byte(image, address++, 0x00);
+          write_byte(image, record.address++, 0x00);
         }
       }
     }
@@ -1099,7 +985,7 @@ int i8080_assemble_text(const char *name, const char *text, i8080_image *image,
   memset(&state, 0, sizeof(state));
   state.name = name;
   state.text = text;
-  if (looks_like_listing(text)) {
+  if (i8080_listing_looks_like_listing(text)) {
     return assemble_listing(text, image, error);
   }
   return assemble_text_internal(&state, image, error);

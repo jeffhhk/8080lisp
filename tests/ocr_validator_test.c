@@ -1,0 +1,123 @@
+#include "ocr_validator.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+static int failures;
+
+static void expect_int(const char *label, int actual, int expected) {
+  if (actual == expected) {
+    return;
+  }
+  fprintf(stderr, "%s: expected %d but saw %d\n", label, expected, actual);
+  failures += 1;
+}
+
+static void expect_contains(const char *label, const char *actual,
+                            const char *expected_substring) {
+  if (strstr(actual, expected_substring) != NULL) {
+    return;
+  }
+  fprintf(stderr, "%s: expected \"%s\" to contain \"%s\"\n", label, actual,
+          expected_substring);
+  failures += 1;
+}
+
+static void test_validator_accepts_accounted_field_discrepancy(void) {
+  static const char *raw_text =
+      "0000 C3 03 00       0001 START  JNP  LOOP     OCR COMMENT\n"
+      "0003 76             0002 LOOP   HLT\n";
+  static const char *corrected_text =
+      "0000 C3 03 00       0001 START  JMP  LOOP     TRUE COMMENT\n"
+      "0003 76             0002 LOOP   HLT\n";
+  static const char *ledger_text =
+      "- id: OCR-0001\n"
+      "  line_number: 1\n"
+      "  address: 0x0000\n"
+      "  field: mnemonic\n"
+      "  original: JNP\n"
+      "  corrected: JMP\n"
+      "  evidence: raw listing mnemonic is inconsistent with opcode bytes\n"
+      "  basis: opcode C3 encodes JMP in 8080\n"
+      "  confidence: high\n"
+      "- id: OCR-0002\n"
+      "  line_number: 1\n"
+      "  address: 0x0000\n"
+      "  field: comment\n"
+      "  original: OCR COMMENT\n"
+      "  corrected: TRUE COMMENT\n"
+      "  evidence: corrected transcription review\n"
+      "  basis: handwritten annotation confirms the intended comment text\n"
+      "  confidence: medium\n";
+  ocr_validator_error error;
+
+  expect_int("accounted discrepancy validates",
+             ocr_validate_texts("raw", raw_text, "corrected", corrected_text,
+                                "ledger", ledger_text, &error),
+             1);
+}
+
+static void test_validator_rejects_unaccounted_discrepancy(void) {
+  static const char *raw_text =
+      "0000 C3 03 00       0001 START  JNP  LOOP\n";
+  static const char *corrected_text =
+      "0000 C3 03 00       0001 START  JMP  LOOP\n";
+  static const char *ledger_text = "";
+  ocr_validator_error error;
+
+  expect_int("unaccounted discrepancy fails",
+             ocr_validate_texts("raw", raw_text, "corrected", corrected_text,
+                                "ledger", ledger_text, &error),
+             0);
+  expect_contains("unaccounted message", error.message,
+                  "unaccounted discrepancy");
+}
+
+static void test_validator_rejects_stale_provenance_entry(void) {
+  static const char *text =
+      "0000 C3 03 00       0001 START  JMP  LOOP\n";
+  static const char *ledger_text =
+      "- id: OCR-0003\n"
+      "  line_number: 1\n"
+      "  address: 0x0000\n"
+      "  field: mnemonic\n"
+      "  original: JNP\n"
+      "  corrected: JMP\n"
+      "  evidence: stale test fixture\n"
+      "  basis: no actual discrepancy remains\n"
+      "  confidence: low\n";
+  ocr_validator_error error;
+
+  expect_int("stale provenance fails",
+             ocr_validate_texts("raw", text, "corrected", text, "ledger",
+                                ledger_text, &error),
+             0);
+  expect_contains("stale provenance message", error.message,
+                  "stale provenance entry");
+}
+
+static void test_validator_accepts_repository_placeholder_files(void) {
+  ocr_validator_error error;
+
+  expect_int("placeholder files validate",
+             ocr_validate_files("orig/lisp_8080_rawocr_2026-04-13.asm",
+                                "src/lisp_8080_corrected.asm",
+                                "docs/OCR_CORRECTIONS.yaml", &error),
+             1);
+}
+
+int main(void) {
+  test_validator_accepts_accounted_field_discrepancy();
+  test_validator_rejects_unaccounted_discrepancy();
+  test_validator_rejects_stale_provenance_entry();
+  test_validator_accepts_repository_placeholder_files();
+
+  if (failures != 0) {
+    fprintf(stderr, "4 tests %d failures 0 skipped\n", failures);
+    return 1;
+  }
+
+  puts("4 tests 0 failures 0 skipped");
+  return 0;
+}
