@@ -16,10 +16,10 @@ I took the 8080 LISP article, OCRed only the listing, and vibe coded an assemble
 
 You can do things like this:
 
-    $ printf 'NULL (NIL) \n' | ./o/i8080emulisp.com src/lisp_8080_corrected.asm
+    $ printf 'NULL (NIL) \n' | ./i8080emulisp.com src/lisp_8080_corrected.asm
 
     >>T
-    $ printf 'NULL ((NIL)) \n' | ./o/i8080emulisp.com src/lisp_8080_corrected.asm
+    $ printf 'NULL ((NIL)) \n' | ./i8080emulisp.com src/lisp_8080_corrected.asm
 
     >>F
 
@@ -31,10 +31,10 @@ There is also an optional browser target now: `make i8080web` produces
 
 I also implemented a coverage feature, so that using a REPL can help browse the working code.  Evaluating a very simple expression has lots of uninteresting coverage, like the reader, etc, so there's a mechanism for taking a baseline and then printing the residual.  Here's what happens if we ask if the list of NIL is NULL (false), and compare it what happens with doing the same for a list of two NILS:
 
-    $ printf 'NULL ((NIL)) \n' | ./o/i8080emulisp.com  --coverage-out coverage-baseline.ndjson src/lisp_8080_corrected.asm
+    $ printf 'NULL ((NIL)) \n' | ./i8080emulisp.com  --coverage-out coverage-baseline.ndjson src/lisp_8080_corrected.asm
 
     >>F
-    $ printf 'NULL ((NIL NIL)) \n' | ./o/i8080emulisp.com  --coverage-baseline-boolean coverage-baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm
+    $ printf 'NULL ((NIL NIL)) \n' | ./i8080emulisp.com  --coverage-baseline-boolean coverage-baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm
 
     >>F
     source coverage:
