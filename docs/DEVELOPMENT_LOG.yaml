@@ -47,3 +47,22 @@
       result: emitted /home/jeff/bin/cosmo/bin/cosmocc -O2 -Wall -Wextra -o o/lisp_cosmo.com src/lisp_runtime.S src/lisp_host_io.c src/lisp_main.c
     - verification: size --format=GNU --radix=10 o/lisp_gcc
       result: text=934 data=1968 bss=69712 total=72614
+- meta: {_: refactor, guid: r3m8}
+  title: Align source layout with the updated implementation plan
+  prompt: |
+    docs/IMPLEMENTATION_PLAN.md has been updated.  Bring the current project in line with the current version.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc from src/lisp_runtime.S and tests C harness sources
+    - verification: make test
+      result: 2 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/lisp_runtime_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/lisp_runtime_test.c and rerun make test
+      result: 2 tests 0 failures 0 skipped
+    - verification: make -n lisp-cosmo
+      result: emitted /home/jeff/bin/cosmo/bin/cosmocc -O2 -Wall -Wextra -Isrc -Itests -o o/lisp_cosmo.com src/lisp_runtime.S tests/lisp_host_io.c tests/lisp_main.c
+    - verification: size --format=GNU --radix=10 o/lisp_gcc
+      result: text=934 data=1968 bss=69712 total=72614

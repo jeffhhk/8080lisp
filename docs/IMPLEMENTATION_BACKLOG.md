@@ -1,5 +1,8 @@
 # Implementation Backlog
 
+- [x] `PORT-0001R`: Align the repository layout with the current plan by
+  keeping assembler sources in `src/`, moving C fixtures into `tests/`, and
+  synthesizing `docs/Reference.md` from validated behavior.
 - [x] `PORT-0001`: Add a GAS runtime scaffold that preserves the original 8080
   register map, boot memory layout, and monitor I/O entry points for the local
   `gcc` validation path.
