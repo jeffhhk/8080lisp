@@ -314,3 +314,38 @@
       result: 20 tests 0 failures 0 skipped
     - verification: ./o/ocr_validator
       result: validated orig/lisp_8080_rawocr_2026-04-13.asm against src/lisp_8080_corrected.asm and docs/OCR_CORRECTIONS.yaml
+- meta: {_: bug, guid: r3k9}
+  title: Reference should match the validated ASSOC lookup path
+  prompt: |
+    Amend test results to resolve any final issues
+
+      Read AGENTS.md and docs/IMPLEMENTATION_PLAN.md first.
+
+      Review the current repository after the validator, Lisp-interpreter tests, and OCR-correction/
+      provenance changes have landed. Resolve any remaining failures, inconsistencies, or validation gaps
+      needed to bring the repo to a clean final state.
+
+      Requirements:
+
+      - run the official build and test commands from docs/IMPLEMENTATION_PLAN.md
+      - run the OCR discrepancy validator against:
+          - orig/lisp_8080_rawocr_2026-04-13.asm
+          - src/lisp_8080_corrected.asm
+          - docs/OCR_CORRECTIONS.yaml
+      - fix any final issues causing failures or contradictions between:
+          - tests
+          - corrected listing
+          - provenance data
+          - reference documentation
+      - prefer minimal bugfixes over broad rewrites
+      - if a failing test was significantly changed, perform the Test Double Check Procedure from AGENTS.md
+      - do not introduce unrelated feature work
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 20 tests 0 failures 0 skipped
+    - verification: ./o/ocr_validator orig/lisp_8080_rawocr_2026-04-13.asm src/lisp_8080_corrected.asm docs/OCR_CORRECTIONS.yaml
+      result: validated the raw listing, corrected listing, and provenance ledger with explicit paths

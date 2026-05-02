@@ -88,6 +88,7 @@
     - evidence: A direct emulator probe during PORT-0002E built the alist ((T.F) (F.T)) using PAIRLIS against the original image.
     - evidence: ASSOC(T, alist) returned (T.F), but ASSOC(F, alist) returned the whole alist instead of the expected (F.T).
     - evidence: The interpreter test suite was narrowed to validate only the stable head-binding lookup path until this behavior is explained.
+    - evidence: docs/Reference.md now limits the documented ASSOC behavior to the validated head-binding path so the manual no longer overclaims non-head lookup support.
   acceptance:
     - acceptance: Reproduce the second-binding lookup failure in an automated test or otherwise disprove it.
     - acceptance: Determine whether the issue is in ASSOC recursion, EQUAL comparison, or the constructed alist shape.

@@ -28,8 +28,8 @@ This manual reflects the behavior validated by the current `make test` fixture.
 - `OUTPUT` renders `NIL` as `NIL`, proper lists as space-separated forms such as
   `(T F)`, and dotted pairs as forms such as `(T.F)`.
 - `EQ` compares atom pointers, and `EQUAL` recursively compares tree structure.
-- `PAIRLIS` zips two lists into an association list, and `ASSOC` returns the
-  first matching `(name.value)` pair from that alist.
+- `PAIRLIS` zips two lists into an association list, and the current automated
+  suite validates the `ASSOC` head-binding lookup path on that alist.
 - `EVAL` validates the atomic environment lookup path, the `QUOTE` special form,
   the `COND` special form, and ordinary application through `CAR` on a quoted
   pair.
