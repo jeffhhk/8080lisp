@@ -79,26 +79,27 @@
     and validating the corrected listing through the emulator-backed
     interpreter tests.
 
-- meta: {_: bug, id: PORT-0002H, status: open, priority: medium, guid: h5n8}
+- meta: {_: bug, id: PORT-0002H, status: done, priority: medium, guid: h5n8}
   title: ASSOC should return a matching non-head binding from PAIRLIS output
   expected_behavior: |
     ASSOC should return the matching binding pair even when the requested key is
     not in the first element of an association list produced by PAIRLIS.
   evidence:
     - evidence: A direct emulator probe during PORT-0002E built the alist ((T.F) (F.T)) using PAIRLIS against the original image.
-    - evidence: ASSOC(T, alist) returned (T.F), but ASSOC(F, alist) returned the whole alist instead of the expected (F.T).
-    - evidence: The interpreter test suite was narrowed to validate only the stable head-binding lookup path until this behavior is explained.
-    - evidence: docs/Reference.md now limits the documented ASSOC behavior to the validated head-binding path so the manual no longer overclaims non-head lookup support.
+    - evidence: The corrected listing now moves the recursive `XCHG` and `JMP ASSO2` bytes out of the `CALL CDR` immediate field in `ASSOC`, so the recursive step no longer jumps to `0xC3EB`.
+    - evidence: `tests/lisp_interpreter_test.c` now validates `ASSOC(F, alist) == (F.T)` alongside the head-binding case.
+    - evidence: `tests/i8080_emu_test.c` now validates monitor-level boolean queries, including `NULL (NIL)` -> `T` and `NULL ((NIL))` -> `F`, which depend on non-head `ASSOC` lookups in the assembled-function table.
+    - evidence: docs/Reference.md now restores the validated non-head `ASSOC` behavior description.
   acceptance:
     - acceptance: Reproduce the second-binding lookup failure in an automated test or otherwise disprove it.
     - acceptance: Determine whether the issue is in ASSOC recursion, EQUAL comparison, or the constructed alist shape.
     - acceptance: Validate correct non-head lookup behavior once the root cause is fixed.
   related:
     - development_log: p7r4
+    - file: src/lisp_8080_corrected.asm
     - file: tests/lisp_interpreter_test.c
-  notes: |
-    Current containment is to avoid asserting non-head ASSOC lookup behavior in
-    the automated interpreter suite until the underlying cause is resolved.
+    - file: tests/i8080_emu_test.c
+    - file: docs/OCR_CORRECTIONS.yaml
 
 - meta: {_: feature, id: PORT-0002I, status: done, priority: medium, guid: i7p3}
   title: Add an NDJSON coverage output option to the emulator CLI

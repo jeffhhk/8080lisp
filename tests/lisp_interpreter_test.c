@@ -360,6 +360,8 @@ static void test_comparison_and_environment_primitives(void) {
               "((T.F) (F.T))");
   expect_text("ASSOC(T)", capture_output(&fixture, assoc_value(&fixture, LISP_T_AT, alist)),
               "(T.F)");
+  expect_text("ASSOC(F)", capture_output(&fixture, assoc_value(&fixture, LISP_F_AT, alist)),
+              "(F.T)");
 
   expect_coverage_hit(&fixture, "eq coverage", LISP_FN_EQ);
   expect_coverage_hit(&fixture, "equal coverage", LISP_FN_EQUAL);

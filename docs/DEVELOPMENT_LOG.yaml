@@ -389,3 +389,31 @@
       result: validated the raw listing, corrected listing, and provenance ledger with explicit paths
     - verification: printf '(LAMBDA (X) X) (3) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
       result: printed >>3 and exited successfully after stdin EOF
+- meta: {_: bug, guid: m7q4}
+  title: Monitor built-ins should resolve non-head ASSOC bindings
+  prompt: |
+    Correct and fix the behavior of asking if NIL is NULL:
+        printf 'NULL (NIL) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
+        printf 'NULL ((NIL)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
+    Whichever version is correct.  Currently both versions print "ABEND".
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 23 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/i8080_emu_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/i8080_emu_test.c and rerun make test
+      result: 23 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/lisp_interpreter_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/lisp_interpreter_test.c and rerun make test
+      result: 23 tests 0 failures 0 skipped
+    - verification: ./o/ocr_validator orig/lisp_8080_rawocr_2026-04-13.asm src/lisp_8080_corrected.asm docs/OCR_CORRECTIONS.yaml
+      result: validated the raw listing, corrected listing, and provenance ledger with explicit paths
+    - verification: printf 'NULL (NIL) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
+      result: printed >>T without ABEND
+    - verification: printf 'NULL ((NIL)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
+      result: printed >>F without ABEND

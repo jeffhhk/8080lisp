@@ -237,7 +237,7 @@ static void test_cli_evaluates_identity_lambda_of_three_from_stdin(void) {
   snprintf(output_path, sizeof(output_path), "/tmp/i8080_cli_output_%ld.txt",
            (long)getpid());
   snprintf(command, sizeof(command),
-           "printf '(LAMBDA (X) X) (3) \\\\n' | ./o/i8080emu src/lisp_8080_corrected.asm > %s",
+           "printf '(LAMBDA (X) X) (3) \n' | ./o/i8080emu src/lisp_8080_corrected.asm > %s",
            output_path);
   status = system(command);
   if (status == -1) {
@@ -257,18 +257,48 @@ static void test_cli_evaluates_identity_lambda_of_three_from_stdin(void) {
   expect_text("stdin cli output", output_text, "\n>>3");
 }
 
+static void test_cli_null_queries_print_boolean_results(void) {
+  char output_path[128];
+  char command[512];
+  char output_text[1024];
+  int status;
+
+  snprintf(output_path, sizeof(output_path), "/tmp/i8080_null_output_%ld.txt",
+           (long)getpid());
+  snprintf(command, sizeof(command),
+           "printf 'NULL (NIL) \nNULL ((NIL)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm > %s",
+           output_path);
+  status = system(command);
+  if (status == -1) {
+    fprintf(stderr, "null query command failed to launch\n");
+    failures += 1;
+    return;
+  }
+  if (!WIFEXITED(status)) {
+    fprintf(stderr, "null query command did not exit cleanly\n");
+    failures += 1;
+    return;
+  }
+  expect_int("null query command exited", WEXITSTATUS(status), 0);
+  if (!read_file_text(output_path, output_text, sizeof(output_text))) {
+    return;
+  }
+  expect_text("null query output", output_text, "\n>>T\n>>F");
+}
+
 int main(void) {
   test_monitor_hooks_work_in_the_emulator();
   test_instruction_pointer_coverage_counts_executed_addresses();
   test_original_image_boots_to_the_monitor_loop();
   test_cli_writes_coverage_ndjson();
   test_cli_evaluates_identity_lambda_of_three_from_stdin();
+  test_cli_null_queries_print_boolean_results();
 
   if (failures != 0) {
-    fprintf(stderr, "5 tests %d failures 0 skipped\n", failures);
+    fprintf(stderr, "6 tests %d failures 0 skipped\n", failures);
     return 1;
   }
 
-  puts("5 tests 0 failures 0 skipped");
+  puts("6 tests 0 failures 0 skipped");
   return 0;
 }

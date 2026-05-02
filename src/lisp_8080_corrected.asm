@@ -188,8 +188,8 @@ PG6 ASSM 0 8000
 0134 E1             0183 NOTYET POP  H
 0135 CD 10 00       0184        CALL CDR      DOWN ASSOC LIST X
 
-0136 EB             0185        XCHG
-0137 C3 17 01       0186        JMP  ASSO2    =CALL,RET
+0138 EB             0185        XCHG
+0139 C3 17 01       0186        JMP  ASSO2    =CALL,RET
 013C CD 2B 00       0187 EVAL   CALL ATOM     (E) (HL,DE) IS (E,A)
 013F C2 53 01       0188        JNZ  NOTAT
 0142 CD 49 00       0189        CALL NULL
