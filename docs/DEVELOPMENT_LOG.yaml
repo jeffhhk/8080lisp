@@ -1,0 +1,22 @@
+- meta: {_: feature, guid: 9x2k}
+  title: Add separate hello world gcc and cosmocc targets
+  prompt: |
+    Can you compile a hello world binary using ~/bin/cosmo/bin/cosmocc?  If not, explain what specific access you need.
+
+    Validate with gcc in the path and provide a makefile target for me to run that directs the same thing at cosmocc.
+    make clean to remove your cosmo dependencies.  Update IMPLEMENTATION_PLAN to separate cosmocc target from gcc target.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: 1 target built with gcc
+    - verification: make test
+      result: 1 test command succeeded and printed hello world
+    - verification: make -n hello-cosmo
+      result: emitted /home/jeff/bin/cosmo/bin/cosmocc -O2 -Wall -Wextra -o o/hello_cosmo.com src/hello_world.c
+    - verification: make -n build
+      result: emitted gcc -O2 -Wall -Wextra -o o/hello_gcc src/hello_world.c
+    - verification: make -n test
+      result: emitted gcc build command followed by ./o/hello_gcc
+    - verification: size --format=GNU --radix=10 o/hello_gcc
+      result: text=369 data=1599 bss=8 total=1976
