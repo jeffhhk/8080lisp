@@ -15,6 +15,27 @@ This manual reflects the behavior validated by the current `make test` fixture.
 - `lisp_outc` emits one byte through the host output hook.
 - `lisp_crlf` emits a line feed byte.
 
+## Lisp Interpreter
+
+- The original image boots to the monitor loop at `0x0599` without `ABEND` or
+  unsupported-opcode faults.
+- The core list routines preserve the original pointer model:
+  `CONS` allocates cons cells, `CAR` and `CDR` return the stored links,
+  and `ATOM`, `ISLIST`, and `NULL` report their results through the `Z` flag.
+- `OUTPUT` renders `NIL` as `NIL`, proper lists as space-separated forms such as
+  `(T F)`, and dotted pairs as forms such as `(T.F)`.
+- `EQ` compares atom pointers, and `EQUAL` recursively compares tree structure.
+- `PAIRLIS` zips two lists into an association list, and `ASSOC` returns the
+  first matching `(name.value)` pair from that alist.
+- `EVAL` validates the atomic environment lookup path, the `QUOTE` special form,
+  the `COND` special form, and ordinary application through `CAR` on a quoted
+  pair.
+- `APPLY` validates both the `LAMBDA` and `LABEL` function-object paths.
+- The definition-list routine at `0x05ff`, which underpins `DEFINE`, prepends a
+  new `(name value)` binding to `EVQAL` and returns the list of defined names.
+- The interpreter tests collect instruction-pointer coverage and assert hits on
+  the exercised Lisp entry points while running the original OCR image.
+
 ## Assembler
 
 - `o/i8080asm` can ingest the OCR listing in `orig/lisp_8080_rawocr_2026-04-13.asm`

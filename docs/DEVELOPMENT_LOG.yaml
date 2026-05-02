@@ -174,3 +174,38 @@
       result: 11 tests 0 failures 0 skipped
     - verification: ./o/ocr_validator
       result: validated orig/lisp_8080_rawocr_2026-04-13.asm against src/lisp_8080_corrected.asm and docs/OCR_CORRECTIONS.yaml
+- meta: {_: feature, guid: p7r4}
+  title: Add interpreter-focused Lisp validation tests
+  prompt: |
+    Add Lisp-interpreter tests:
+
+      Read AGENTS.md and docs/IMPLEMENTATION_PLAN.md first.
+
+      According to the "Testing Strategy" in docs/IMPLEMENTATION_PLAN.md, add a suite of tests for the Lisp
+      interpreter itself, focusing on validated behavior of the original Lisp system rather than OCR
+      correction infrastructure.
+
+      Requirements:
+
+      - test Lisp interpreter behavior, not just assembler or emulator mechanics
+      - cover the Lisp primitives and major code paths required by the implementation plan
+      - prefer automated tests
+      - reuse existing emulator and host I/O infrastructure where practical
+      - leverage the --coverage functionality of the emulator if applicable
+      - document validated behavior in docs/Reference.md
+      - do not modify orig/lisp_8080_rawocr_2026-04-13.asm in this change
+      - do not add OCR provenance or corrected-listing work in this change unless absolutely required for
+        test fixtures
+
+      Follow all repo policies.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 16 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/lisp_interpreter_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/lisp_interpreter_test.c and rerun make test
+      result: 16 tests 0 failures 0 skipped
