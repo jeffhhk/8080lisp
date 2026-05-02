@@ -10,7 +10,9 @@ The IBM PC would not come out for nearly 3 more years, (Aug 1981).  Because ther
 
 Typical setups of the time included second-hand ASR-33 teletypes (individuals couldn't just order them), VDM-1 style S-100 video cards, or some variation of the "TV Typewriter Cookbook".  Maxing out the 64k RAM address space was still expensive, roughly $1200 in 1978 (equivalent to $6000 today).
 
-The port's target machine is Cosmopolitan binary, able to run on any 64-bit Intel Linux, Mac or Windows machine.
+Earlier that year, John McCarthy had published ["History of LISP"](https://dl.acm.org/doi/10.1145/960118.808387) in the [HOPL I](https://dl.acm.org/toc/sigplan/1978/13/8) conference.
+
+Also earlier in 1978 was [The Revised Report on Scheme](https://research.scheme.org/lambda-papers/lambda-papers-revised-report.html#lisp-is-a-ball-of-mud) (aka MIT AI Memo No 452).
 
 # Description
 
