@@ -70,12 +70,17 @@ Mimic intermediate entry points in the original code, example here CAR2:
 Preserve label names when possible, e.g. CDR:
     000F C9             0020 CDR    PUSH PSW
 
-Preserve comments whenever they are more than a copy of the instruction, e.g.:
-    EQU 0F000H  MONITOR REENTRY
-    . . .
-    INX  H        SKIP CAR PTR
-    . . .
-    LXI  D,4      NEED 4 BYTES
+### Comment preservation
+
+- Preserve every original source comment during translation.
+- If a translated instruction corresponds 1:1 with the source instruction, copy the comment onto that
+translated instruction.
+- If one source instruction expands into multiple translated instructions, preserve the original
+comment on the first translated instruction of that block, or in an immediately preceding block
+comment.
+- If multiple adjacent source comments describe one idea, they may be merged into one nearby block
+comment, but no original comment text may be dropped.
+- Comment preservation is mandatory completion criteria for each translated routine.
 
 ## Change constraints
 
