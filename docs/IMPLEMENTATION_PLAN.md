@@ -2,7 +2,7 @@
 
 ## Product Goal
 
-Port the 8080 lisp implementation to a 64 bit intel assembler program.
+Make the 8080 lisp implementation run in a custom 8080 emulator with some instrumentation and visualization extras.
 
 ## Original Code
 
@@ -20,51 +20,23 @@ orig/lisp_8080_rawocr_2026-04-13.asm
 
 - Keep the local validation path separate from the `gcc` build path
 - Use `gcc` for the default local validation target
-- Use GNU assembler via gcc
-- .intel_syntax noprefix
-- Implement lisp completely in assembler
 - Test fixture must test every LISP primitive at least once
 - Test fixtures are free to use C
 
 ### Directories
 
-src/ - ported program (assembler and header files only)
-tests/ - test code (C code)
+src/ - ported program
+tests/ - test code
 
-### Register Mapping
-
-Use the following register map to translate from 8080 to 8086 registers.
-
-| **8080 (8-bit)** | **8080 Pair / Role** | **8086 (16-bit)** | **Notes**                              |
-| ---------------- | -------------------- | ----------------- | -------------------------------------- |
-| A                | Accumulator          | AL → AX           | Direct match (low byte of AX)          |
-| B                | BC (high)            | BH → BX           | Forms BX with C                        |
-| C                | BC (low)             | BL → BX           |                                        |
-| D                | DE (high)            | DH → DX           | Forms DX with E                        |
-| E                | DE (low)             | DL → DX           |                                        |
-| H                | HL (high)            | (no exact)        | SI                                     |
-| BC               | Register pair        | BX                | General-purpose                        |
-| DE               | Register pair        | DX                | Often used for I/O                     |
-| SP               | Stack Pointer        | SP                | Same role, wider                       |
-| PC               | Program Counter      | IP                | Same concept                           |
-| F                | Flags                | FLAGS             | 8086 has more flags                    |
-
-### Memory mapping
-
-Since addresses in the Original Code are based on 16 bits, but we are running in a 64 bit process, use the following memory mapping:
-    - The host allocates one native object, lisp_memory, of size 65536 bytes.
-    - Code keeps its base address in r15 while running. Any Lisp address x is interpreted as native
-    address r15 + x.
-
-### Instruction mapping
+### Assembler mapping
 
 Make sure the translated file routines are listed in the same order as in the source file.
 
-Mimic overlapping routines in the Original Code, example here CDR:
+Preserve overlapping routines in the Original Code, example here CDR:
     0011 CADDR  CALL CDR
     0012 CADR   CALL CDR
 
-Mimic intermediate entry points in the Original Code, example here CAR2:
+Preserve intermediate entry points in the Original Code, example here CAR2:
     0013 CAR    PUSH PSW     SAVE A,F
     0014 CAR2   MOV  A,M     GET CAR/CDR PTR
     0015        INX  H
@@ -100,8 +72,7 @@ comment, but no Original Code comment text may be dropped.
 
 ## Change constraints
 
-- Before commit, validate the size of the program with "size --format=GNU --radix=10", and record the result in DEVELOPMENT_LOG.yaml as a verification.
-- Update documentation according to Documentation Strategy
+For each change, update documentation according to Documentation Strategy
 
 ## Testing Strategy
 
