@@ -295,3 +295,19 @@
     - task: PORT-0002R
     - file: .github/workflows/pages.yml
     - file: docs/BUILD.md
+
+- meta: {_: feature, id: PORT-0002T, status: done, priority: medium, guid: t4u6}
+  title: Publish the Cosmopolitan self-extracting archive from GitHub Actions
+  expected_behavior: |
+    Pushing to `main` should trigger a GitHub Actions workflow that installs the
+    Cosmopolitan compiler toolchain, runs `make build-cosmo`, and uploads the
+    resulting `o/8080LISP.com` archive as a downloadable workflow artifact.
+  evidence:
+    - evidence: "`.github/workflows/cosmo.yml` checks out the repository, downloads `cosmocc-4.0.2.zip`, unpacks it to `$HOME/bin/cosmo`, and verifies `x86_64-unknown-cosmo-cc` before building."
+    - evidence: "The workflow invokes `make build-cosmo`, matching the repository's documented Cosmopolitan build path."
+    - evidence: "`actions/upload-artifact@v4` publishes `o/8080LISP.com` and fails the job if that file was not produced."
+    - evidence: "`docs/BUILD.md` now documents the new CI workflow and its use of the default `COSMO_PATH` install location."
+  related:
+    - task: PORT-0002N
+    - file: .github/workflows/cosmo.yml
+    - file: docs/BUILD.md

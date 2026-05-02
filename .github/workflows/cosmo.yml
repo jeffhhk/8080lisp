@@ -1,0 +1,36 @@
+name: Build Cosmopolitan Artifact
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-cosmo:
+    runs-on: ubuntu-latest
+    env:
+      COSMOCC_VERSION: 4.0.2
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Install cosmocc
+        run: |
+          mkdir -p "$HOME/bin/cosmo"
+          curl -fsSL "https://justine.lol/cosmopolitan/cosmocc-${COSMOCC_VERSION}.zip" -o /tmp/cosmocc.zip
+          unzip -oq /tmp/cosmocc.zip -d "$HOME/bin/cosmo"
+          "$HOME/bin/cosmo/bin/x86_64-unknown-cosmo-cc" --version
+
+      - name: Build Cosmopolitan archive
+        run: make build-cosmo
+
+      - name: Upload 8080LISP.com artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 8080LISP.com
+          path: o/8080LISP.com
+          if-no-files-found: error

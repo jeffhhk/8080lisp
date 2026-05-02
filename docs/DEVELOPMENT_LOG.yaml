@@ -683,3 +683,18 @@
       result: confirmed the workflow now uses `actions/checkout@v5`, `actions/configure-pages@v6`, and `actions/deploy-pages@v5`
     - verification: make package-web
       result: rebuilt o/i8080web.html successfully after the workflow compatibility update
+- meta: {_: feature, guid: c3m7}
+  title: Publish the Cosmopolitan self-extracting archive from GitHub Actions
+  prompt: |
+    Please make Github Actions compile my "make build-cosmo" and publish o/8080LISP.com as an artifact.  (Installation of cosmocc required)
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 34 tests 0 failures 0 skipped
+    - verification: make build-cosmo
+      result: built the Cosmopolitan targets and packaged o/8080LISP.com
+    - verification: sed -n '1,220p' .github/workflows/cosmo.yml
+      result: confirmed the workflow installs cosmocc, runs make build-cosmo, and uploads o/8080LISP.com with actions/upload-artifact@v4

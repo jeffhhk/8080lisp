@@ -6,6 +6,7 @@
 - `make build-cosmo` runs `make clean` and then rebuilds the shared `build` target with `CC=x86_64-unknown-cosmo-cc`, `BINEXT=.com`, and `PATH` augmented by `$(HOME)/bin/cosmo/bin`
 - `make i8080web` optionally installs an embedded emsdk checkout and emits a standalone `o/i8080web.html` page for the corrected Lisp monitor
 - pushing to `main` runs `.github/workflows/pages.yml`, which builds `o/i8080web.html`, stages it as `index.html`, and deploys it to GitHub Pages
+- pushing to `main` also runs `.github/workflows/cosmo.yml`, which downloads `cosmocc-4.0.2.zip` into `$(HOME)/bin/cosmo`, runs `make build-cosmo`, and uploads `o/8080LISP.com` as a GitHub Actions artifact
 
 The local `gcc` path keeps the existing Linux-native output names under `o/`.
 The Cosmopolitan path emits cross-platform `.com` binaries under `o/`:
@@ -71,3 +72,9 @@ setting is enabled, `actions/configure-pages` fails with a `Get Pages site
 failed` / `Not Found` error because the repository does not yet have a Pages
 site configured. The workflow publishes the generated artifact from CI; it does
 not require committing `o/i8080web.html`.
+
+The Cosmopolitan artifact workflow uses the same default `COSMO_PATH` that the
+Makefile expects locally, so the runner installs `cosmocc` under
+`$HOME/bin/cosmo/bin` before invoking `make build-cosmo`. That workflow uploads
+the packaged self-extracting archive from `o/8080LISP.com`; it does not commit
+generated `o/` output.
