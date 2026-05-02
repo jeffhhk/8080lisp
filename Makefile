@@ -41,7 +41,10 @@ COSMO_EMBED_FILES := \
 	src/ocr_validator.c src/ocr_validator.h src/ocr_validator_main.c tests/i8080_asm_test.c tests/i8080_emu_test.c \
 	tests/i8080_web_test.c tests/lisp_host_io.c tests/lisp_host_io.h tests/lisp_interpreter_test.c tests/lisp_main.c \
 	tests/lisp_runtime_test.c tests/ocr_validator_test.c tools/text_to_c_header.py web/i8080web_shell.html \
-	ensure_emsdk_installed.sh ensure_emsdk_uninstalled.sh
+	ensure_emsdk_installed.sh ensure_emsdk_uninstalled.sh \
+	ensure_emsdk_installed.sh ensure_emsdk_uninstalled.sh src/i8080_web_app.c src/i8080_web_app.h \
+	src/i8080web_main.c src/lisp_runtime_emscripten.c tests/i8080_web_test.c tools/text_to_c_header.py \
+	web/i8080web_shell.html
 LISP_GCC := $(BUILD_DIR)/lisp_gcc$(BINEXT)
 LISP_TEST := $(BUILD_DIR)/lisp_test
 LISP_EMSCRIPTEN_RUNTIME_TEST := $(BUILD_DIR)/lisp_runtime_emscripten_test
