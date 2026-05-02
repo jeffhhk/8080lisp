@@ -2,24 +2,30 @@
 
 ## Product Goal
 
-Port the 8080 lisp implementation to a cosmopolitan binary.
+Port the 8080 lisp implementation to a 64 bit intel assembler program.
 
 ## Official Build Commands
 
 - `make clean`
 - `make build` for the local `gcc` validation target
 - `make test` for the local `gcc` validation target
-- `make lisp-cosmo` for the separate `cosmocc` target
+- `make lisp-cosmo` for the separate `cosmocc` target (manual run only)
+    - replaces `gcc` with `cosmocc` for the cosmopolitan target
 
 ## Implementation rules
 
-- Keep the local validation path separate from the `cosmocc` build path
+- Keep the local validation path separate from the `gcc` build path
 - Use `gcc` for the default local validation target
-- Use GNU assembler via `~/bin/cosmo/bin/cosmocc` for the cosmopolitan target
+- Use GNU assembler via gcc
 - .intel_syntax noprefix
-- Implement lisp completely in gas except as otherwise required by cosmo
+- Implement lisp completely in assembler
 - Test fixture must test every LISP primitive at least once
 - Test fixtures are free to use C
+
+### Directories
+
+src/ - ported program (assembler and header files only)
+tests/ - test code (C code)
 
 ### Register Mapping
 
