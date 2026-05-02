@@ -17,11 +17,14 @@ This manual reflects the behavior validated by the current `make test` fixture.
 
 ## Lisp Interpreter
 
-- The original image boots to the monitor loop at `0x0599` without `ABEND` or
-  unsupported-opcode faults.
+- The corrected OCR listing boots to the monitor loop at `0x0599` without
+  `ABEND` or unsupported-opcode faults.
 - The core list routines preserve the original pointer model:
   `CONS` allocates cons cells, `CAR` and `CDR` return the stored links,
   and `ATOM`, `ISLIST`, and `NULL` report their results through the `Z` flag.
+- The corrected OCR listing aligns the opening dispatch block so the validated
+  direct routine entries are `CAR` at `0x0009`, `CDR` at `0x0010`, and `CONS`
+  at `0x0016`.
 - `OUTPUT` renders `NIL` as `NIL`, proper lists as space-separated forms such as
   `(T F)`, and dotted pairs as forms such as `(T.F)`.
 - `EQ` compares atom pointers, and `EQUAL` recursively compares tree structure.
@@ -34,7 +37,7 @@ This manual reflects the behavior validated by the current `make test` fixture.
 - The definition-list routine at `0x05ff`, which underpins `DEFINE`, prepends a
   new `(name value)` binding to `EVQAL` and returns the list of defined names.
 - The interpreter tests collect instruction-pointer coverage and assert hits on
-  the exercised Lisp entry points while running the original OCR image.
+  the exercised Lisp entry points while running the corrected OCR listing.
 
 ## Assembler
 
@@ -50,6 +53,9 @@ This manual reflects the behavior validated by the current `make test` fixture.
   provenance ledger at field granularity.
 - The validator recognizes discrepancies in `bytes`, `label`, `mnemonic`,
   `operand`, `comment`, and `whole_line`.
+- Provenance `basis` values are restricted to `instruction-encoding`,
+  `cross-reference`, `control-flow`, `duplicate-pattern`, `runtime-behavior`,
+  and `scan-review`.
 - Validation fails if a raw-vs-corrected discrepancy is missing from
   `docs/OCR_CORRECTIONS.yaml`.
 - Validation also fails if a provenance entry does not match any current

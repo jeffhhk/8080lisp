@@ -53,7 +53,7 @@
   related:
     - development_log: p7r4
 
-- meta: {_: bug, id: PORT-0002G, status: open, priority: high, guid: g4m7}
+- meta: {_: bug, id: PORT-0002G, status: done, priority: high, guid: g4m7}
   title: Corrected Lisp routine labels should match the encoded entry addresses
   expected_behavior: |
     Routine labels in the corrected Lisp listing should identify the actual
@@ -63,6 +63,8 @@
     - evidence: During the PORT-0002E interpreter test work, direct execution of CONS behaved correctly only when entered at 0x0016.
     - evidence: The original image contains CALL sites to 0x0016 for CONS, while the corrected listing presentation makes CONS appear to begin at 0x0013.
     - evidence: The interpreter tests in tests/lisp_interpreter_test.c had to call the real encoded entry addresses from the assembled image rather than the apparent listing label positions.
+    - evidence: The corrected listing now realigns the opening OCR-shifted block so CAR starts at 0x0009, CDR at 0x0010, and CONS at 0x0016.
+    - evidence: docs/OCR_CORRECTIONS.yaml records each justified opening-block correction, and tests/lisp_interpreter_test.c now assembles the corrected listing successfully.
   acceptance:
     - acceptance: Determine whether the mismatch is a corrected-listing transcription problem, a presentation problem, or a test-assumption problem.
     - acceptance: Update the corrected listing or supporting tooling so routine labels and encoded entry addresses agree.
@@ -71,9 +73,11 @@
     - development_log: p7r4
     - file: src/lisp_8080_corrected.asm
     - file: tests/lisp_interpreter_test.c
+    - file: docs/OCR_CORRECTIONS.yaml
   notes: |
-    Current containment is to trust the encoded call targets in the assembled
-    image when driving direct routine-level tests.
+    Resolved by correcting the shifted opening block in the maintained OCR copy
+    and validating the corrected listing through the emulator-backed
+    interpreter tests.
 
 - meta: {_: bug, id: PORT-0002H, status: open, priority: medium, guid: h5n8}
   title: ASSOC should return a matching non-head binding from PAIRLIS output

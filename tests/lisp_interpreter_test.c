@@ -135,9 +135,9 @@ static int ensure_original_image(void) {
   if (original_image_loaded) {
     return 1;
   }
-  if (!i8080_assemble_file("orig/lisp_8080_rawocr_2026-04-13.asm",
+  if (!i8080_assemble_file("src/lisp_8080_corrected.asm",
                            &original_image, &error)) {
-    fprintf(stderr, "assemble original image: %s\n", error.message);
+    fprintf(stderr, "assemble corrected image: %s\n", error.message);
     failures += 1;
     return 0;
   }

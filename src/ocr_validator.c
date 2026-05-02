@@ -176,6 +176,25 @@ static int parse_field_name(const char *text, ocr_field *field) {
   return 0;
 }
 
+static int parse_basis_name(const char *text) {
+  static const char *const basis_names[] = {
+      "instruction-encoding",
+      "cross-reference",
+      "control-flow",
+      "duplicate-pattern",
+      "runtime-behavior",
+      "scan-review",
+  };
+  size_t i;
+
+  for (i = 0; i < sizeof(basis_names) / sizeof(basis_names[0]); ++i) {
+    if (strcmp(text, basis_names[i]) == 0) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 static int parse_number(const char *text, uint16_t *value) {
   char buffer[64];
   char *end = NULL;
@@ -418,6 +437,11 @@ static int parse_provenance_entries(const char *ledger_text,
       snprintf(current.evidence, sizeof(current.evidence), "%s", value);
       current.has_evidence = 1;
     } else if (strcmp(key, "basis") == 0) {
+      if (!parse_basis_name(value)) {
+        set_error(error, ledger_line_number, "invalid provenance basis");
+        free(content);
+        return 0;
+      }
       snprintf(current.basis, sizeof(current.basis), "%s", value);
       current.has_basis = 1;
     } else if (strcmp(key, "confidence") == 0) {
@@ -573,13 +597,33 @@ static int collect_discrepancies(const char *raw_text, const char *corrected_tex
     copy_trimmed_line(corrected_trimmed, sizeof(corrected_trimmed),
                       corrected_line);
 
-    if (!i8080_parse_listing_record(raw_line == NULL ? "" : raw_line,
-                                    &raw_record) ||
-        !i8080_parse_listing_record(corrected_line == NULL ? "" : corrected_line,
-                                    &corrected_record)) {
+    int raw_ok =
+        i8080_parse_listing_record(raw_line == NULL ? "" : raw_line, &raw_record);
+    int corrected_ok = i8080_parse_listing_record(
+        corrected_line == NULL ? "" : corrected_line, &corrected_record);
+
+    if (!raw_ok || !corrected_ok) {
+      size_t line_number = physical_line_number;
+      int has_address = 0;
+      uint16_t address = 0;
+
+      if (raw_ok) {
+        line_number = raw_record.has_statement_line_number
+                          ? raw_record.statement_line_number
+                          : physical_line_number;
+        has_address = raw_record.has_address;
+        address = raw_record.address;
+      } else if (corrected_ok) {
+        line_number = corrected_record.has_statement_line_number
+                          ? corrected_record.statement_line_number
+                          : physical_line_number;
+        has_address = corrected_record.has_address;
+        address = corrected_record.address;
+      }
+
       if (strcmp(raw_trimmed, corrected_trimmed) != 0 &&
-          !append_discrepancy(discrepancies, physical_line_number,
-                              physical_line_number, 0, 0,
+          !append_discrepancy(discrepancies, physical_line_number, line_number,
+                              has_address, address,
                               OCR_FIELD_WHOLE_LINE, raw_trimmed,
                               corrected_trimmed, error)) {
         free(raw_copy);

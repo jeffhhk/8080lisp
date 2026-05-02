@@ -9,32 +9,32 @@ PG6 ASSM 0 8000
 0000                0007
 0000                0008 *
 0000                0009 *
-0000                0010        JMP  START
-0000 C3 B6 04       0011 CADDR  CALL CDR
-0003 CD 10 00       0012 CADR   CALL CDR
-0006 CD 10 00       0013 CAR    PUSH PSW     SAVE A,F
-0009 F5             0014 CAR2   MOV  A,M     GET CAR/CDR PTR
-000A 7E             0015        INX  H
-000B 23             0016        MOV  H,M     HL:=CAR(HL)
-000C 66             0017        MOV  L,A
-000D 6F             0018        POP  PSW
-000E F1             0019        RET
-000F C9             0020 CDR    PUSH PSW
-0010 F5             0021        INX  H        SKIP CAR PTR
-0011 23             0022        INX  H        FOR HL:=CDR(HL)
-0012 23             0023        JMP  CAR2
-0013 C3 0A 00       0024 CONS   PUSH PSW     SAVE NEW CDR VALUE
-0016 D5             0025        PUSH H       SAVE NEW CAR VALUE
-0017 E5             0026        LXI  D,4      NEED 4 BYTES
-0018 11 04 00       0027        CALL GMEM    GET MEMORY
-001B CD AD 05       0028        POP  D       CAR VALUE
-001E D1             0029        MOV  M,E      INTO LINK
-001F 73             0030        INX  H
-0020 23             0031        MOV  M,D
-0021 72             0032        INX  H
-0022 23             0033        POP  D       CDR VALUE
-0023 D1             0034        MOV  M,E
-0024 73
+0000 C3 B6 04       0010        JMP  START
+0003 CD 10 00       0011 CADDR  CALL CDR
+0006 CD 10 00       0012 CADR   CALL CDR
+0009 F5             0013 CAR    PUSH PSW     SAVE A,F
+000A 7E             0014 CAR2   MOV  A,M     GET CAR/CDR PTR
+000B 23             0015        INX  H
+000C 66             0016        MOV  H,M     HL:=CAR(HL)
+000D 6F             0017        MOV  L,A
+000E F1             0018        POP  PSW
+000F C9             0019        RET
+0010 F5             0020 CDR    PUSH PSW
+0011 23             0021        INX  H        SKIP CAR PTR
+0012 23             0022        INX  H        FOR HL:=CDR(HL)
+0013 C3 0A 00       0023        JMP  CAR2
+0016 D5             0024 CONS   PUSH PSW     SAVE NEW CDR VALUE
+0017 E5             0025        PUSH H       SAVE NEW CAR VALUE
+0018 11 04 00       0026        LXI  D,4      NEED 4 BYTES
+001B CD AD 05       0027        CALL GMEM    GET MEMORY
+001E D1             0028        POP  D       CAR VALUE
+001F 73             0029        MOV  M,E      INTO LINK
+0020 23             0030        INX  H
+0021 72             0031        MOV  M,D
+0022 23             0032        INX  H
+0023 D1             0033        POP  D       CDR VALUE
+0024 73             0034        MOV  M,E
+
 
 0025 23             0035        INX  H
 0026 72             0036        MOV  M,D

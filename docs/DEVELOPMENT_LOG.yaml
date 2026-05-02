@@ -225,3 +225,62 @@
       result: build target was already up to date
     - verification: make test
       result: 16 tests 0 failures 0 skipped
+- meta: {_: bug, guid: z8p4}
+  title: Corrected OCR listing should align opening routine entries and provenance
+  prompt: |
+    Correct the OCR-derived listing and define and populate provenance data
+
+      Read AGENTS.md and docs/IMPLEMENTATION_PLAN.md first.
+
+      Keep orig/lisp_8080_rawocr_2026-04-13.asm unchanged as the raw OCR source. Create and maintain a
+      corrected copy at src/lisp_8080_corrected.asm.
+
+      Using the validator tool and the Lisp/emulator test infrastructure already in the repo, correct
+      transcription errors in the OCR-derived listing and create a provenance ledger at docs/
+      OCR_CORRECTIONS.yaml.
+
+      Requirements:
+
+      - allow for OCR errors in either the machine-code columns or the assembly text
+      - record every correction in docs/OCR_CORRECTIONS.yaml
+      - use provenance entries with fields:
+          - id
+          - line_number
+          - address
+          - field
+          - original
+          - corrected
+          - evidence
+          - basis
+          - confidence
+      - acceptable basis values may include:
+          - instruction-encoding
+          - cross-reference
+          - control-flow
+          - duplicate-pattern
+          - runtime-behavior
+          - scan-review
+      - make only justified corrections
+      - keep edits to src/lisp_8080_corrected.asm minimal and traceable
+      - run the validator so that all discrepancies between raw and corrected listings are accounted for in
+        the provenance ledger
+      - extend docs/Reference.md if newly validated behavior becomes clear from this work
+
+      Follow all repo policies.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 18 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/ocr_validator_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/ocr_validator_test.c and rerun make test
+      result: 18 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/lisp_interpreter_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/lisp_interpreter_test.c and rerun make test
+      result: 18 tests 0 failures 0 skipped
+    - verification: ./o/ocr_validator
+      result: validated orig/lisp_8080_rawocr_2026-04-13.asm against src/lisp_8080_corrected.asm and docs/OCR_CORRECTIONS.yaml
