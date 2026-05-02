@@ -84,3 +84,21 @@
       result: 4 tests 0 failures 0 skipped
     - verification: ./o/i8080asm orig/lisp_8080_rawocr_2026-04-13.asm /tmp/lisp.bin && wc -c /tmp/lisp.bin
       result: emitted a 1759-byte flat binary from the OCR listing
+- meta: {_: feature, guid: m8t2}
+  title: Add an 8080 emulator with host monitor hooks
+  prompt: |
+    Make me a 8080 emulator.
+    Patch the INCH and COUT functions to the host machine so we can see what's going on.
+    Make a matching assembler.
+    Both the emulator and assembler should be capable of ingesting orig/lisp_8080_rawocr_2026-04-13.asm.
+  verifications:
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, and o/i8080emu with gcc
+    - verification: make test
+      result: 6 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/i8080_emu_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/i8080_emu_test.c and rerun make test
+      result: 6 tests 0 failures 0 skipped
+    - verification: printf 'ATOM (T) \\n' | ./o/i8080emu orig/lisp_8080_rawocr_2026-04-13.asm
+      result: invoked the emulator against the original OCR image with host monitor hooks active

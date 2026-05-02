@@ -22,3 +22,12 @@ This manual reflects the behavior validated by the current `make test` fixture.
 - The same assembler also accepts a small clean-source subset used by the local
   tests: `ORG`, `EQU`, `DB`, `DW`, `DS`, labels, and the 8080 opcodes exercised
   by the new fixture.
+
+## Emulator
+
+- `o/i8080emu` emulates the 8080 instruction subset exercised by the current
+  Lisp image and the local hook fixture.
+- `CALL 0xF006`, `CALL 0xF009`, `CALL 0xF021`, and `CALL 0xF000` are patched to
+  host `INCH`, `OUTC`, `CRLF`, and `ABEND` behaviors.
+- The current automated coverage validates that the original OCR image boots to
+  its monitor loop at `0x0599` without unsupported-opcode faults.
