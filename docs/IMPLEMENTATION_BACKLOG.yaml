@@ -52,17 +52,3 @@
     - evidence: The original backlog tracked PORT-0002E as complete.
   related:
     - development_log: p7r4
-
-- meta: {_: docs, id: PORT-0002F, status: done, priority: low, guid: r6f7}
-  title: Implementation backlog metadata should live in YAML
-  expected_behavior: |
-    Implementation backlog items should be tracked in docs/IMPLEMENTATION_BACKLOG.yaml
-    using structured metadata that matches the repository policy.
-  evidence:
-    - evidence: AGENTS.md now specifies docs/IMPLEMENTATION_BACKLOG.yaml and a fixed YAML item format.
-    - evidence: The prior checklist backlog lived in docs/IMPLEMENTATION_BACKLOG.md and did not encode the required fields.
-  acceptance:
-    - acceptance: Convert the existing backlog items into the required YAML structure.
-    - acceptance: Remove the superseded docs/IMPLEMENTATION_BACKLOG.md file.
-  related:
-    - file: AGENTS.md
