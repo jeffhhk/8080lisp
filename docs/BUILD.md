@@ -26,7 +26,11 @@ program output; the report shows only covered source lines with per-line hit
 totals and inserts `...` between non-adjacent covered lines. Pass
 `--coverage-baseline path` together with `--coverage-source-display-on-exit` to
 subtract baseline per-address hits before the source lines are aggregated, so
-only coverage in excess of the baseline is displayed.
+only coverage in excess of the baseline is displayed. Pass
+`--coverage-baseline-boolean path` together with
+`--coverage-source-display-on-exit` to hide every source line touched by the
+baseline while preserving the current run's original counts on the remaining
+displayed lines.
 
 The OCR validator binary is written to `o/ocr_validator`. With no arguments it
 validates `orig/lisp_8080_rawocr_2026-04-13.asm`,

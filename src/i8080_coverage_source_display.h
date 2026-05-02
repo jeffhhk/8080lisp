@@ -9,6 +9,7 @@
 int i8080_write_coverage_source_display(FILE *stream, const char *path,
                                         const i8080_image *image,
                                         const i8080_coverage *coverage,
+                                        const i8080_coverage *line_filter,
                                         i8080_asm_error *error);
 
 #endif

@@ -83,6 +83,9 @@ This manual reflects the behavior validated by the current `make test` fixture.
 - When `--coverage-baseline coverage.ndjson` is also provided, the emulator
   subtracts the baseline address hits from the completed run before rendering
   source coverage, and only positive residual coverage is displayed.
+- When `--coverage-baseline-boolean coverage.ndjson` is provided, the emulator
+  removes any source line touched by baseline-covered addresses from the final
+  source display, while leaving the remaining displayed counts unchanged.
 - Each nonzero coverage line has the form `0xADDR COUNT`, where `COUNT` is how
   many times that address became the instruction pointer for an opcode fetch.
 - Each NDJSON address record includes `kind`, `address`, `address_hex`, and
@@ -103,3 +106,4 @@ This manual reflects the behavior validated by the current `make test` fixture.
     printf 'NULL (NIL) \nNULL ((NIL)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
     printf 'NULL (NIL) \n' | ./o/i8080emu --coverage-source-display-on-exit src/lisp_8080_corrected.asm
     printf 'NULL (NIL) \n' | ./o/i8080emu --coverage-baseline baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm
+    printf 'NULL (NIL) \n' | ./o/i8080emu --coverage-baseline-boolean baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm

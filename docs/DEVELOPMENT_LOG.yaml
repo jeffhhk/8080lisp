@@ -464,3 +464,26 @@
       result: wrote a baseline NDJSON file for the monitor query, while also revealing that the current `CAR ((T.F))` evaluator output is corrupted and should be tracked separately
     - verification: printf 'CAR ((T.F)) \n' | timeout 2s ./o/i8080emu --coverage-baseline /tmp/i8080_cov_baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm
       result: subtracted the identical baseline and printed only the evaluation result plus an empty `source coverage:` section with no residual covered lines
+- meta: {_: feature, guid: u6n4}
+  title: Add boolean baseline filtering for emulator source coverage display
+  prompt: |
+    Implement --coverage-baseline-boolean baseline.ndjson:
+        printf 'CAR ((T.F)) \n' | timeout 2s ./o/i8080emu --coverage-baseline-boolean baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm
+
+    When a baseline is provided, before displaying the final source run, remove from the coverage every line in the baseline as "not interesting".  Then display the remaining lines/counts.
+    Retain the existing --coverage-baseline feature.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 26 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/i8080_emu_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/i8080_emu_test.c and rerun make test
+      result: 26 tests 0 failures 0 skipped
+    - verification: printf 'CAR ((T.F)) \n' | ./o/i8080emu --coverage-out /tmp/i8080_cov_boolean_baseline.ndjson src/lisp_8080_corrected.asm
+      result: wrote a baseline NDJSON file for the monitor query
+    - verification: printf 'CAR ((T.F)) \n' | timeout 2s ./o/i8080emu --coverage-baseline-boolean /tmp/i8080_cov_boolean_baseline.ndjson --coverage-source-display-on-exit src/lisp_8080_corrected.asm
+      result: printed the evaluation result plus an empty `source coverage:` section because every covered source line in the run was touched by the baseline

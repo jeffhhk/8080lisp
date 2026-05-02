@@ -98,11 +98,13 @@ static void trim_cr(char *line) {
 int i8080_write_coverage_source_display(FILE *stream, const char *path,
                                         const i8080_image *image,
                                         const i8080_coverage *coverage,
+                                        const i8080_coverage *line_filter,
                                         i8080_asm_error *error) {
   char *text = NULL;
   char *cursor;
   char *line;
   size_t *line_hits = NULL;
+  unsigned char *filtered_lines = NULL;
   size_t line_count;
   size_t line_number = 0;
   size_t previous_covered_line = 0;
@@ -119,6 +121,13 @@ int i8080_write_coverage_source_display(FILE *stream, const char *path,
     set_error(error, "out of memory");
     return 0;
   }
+  filtered_lines = calloc(line_count + 1, sizeof(*filtered_lines));
+  if (filtered_lines == NULL) {
+    free(line_hits);
+    free(text);
+    set_error(error, "out of memory");
+    return 0;
+  }
 
   for (address = 0; address < I8080_IMAGE_SIZE; ++address) {
     size_t hits = coverage->ip_hits[address];
@@ -129,13 +138,24 @@ int i8080_write_coverage_source_display(FILE *stream, const char *path,
     }
     line_hits[source_line] += hits;
   }
+  if (line_filter != NULL) {
+    for (address = 0; address < I8080_IMAGE_SIZE; ++address) {
+      size_t source_line = image->source_lines[address];
+
+      if (line_filter->ip_hits[address] == 0 || source_line == 0 ||
+          source_line > line_count) {
+        continue;
+      }
+      filtered_lines[source_line] = 1;
+    }
+  }
 
   fputs("source coverage:\n", stream);
   cursor = text;
   while ((line = next_line(&cursor)) != NULL) {
     line_number += 1;
     trim_cr(line);
-    if (line_hits[line_number] == 0) {
+    if (line_hits[line_number] == 0 || filtered_lines[line_number] != 0) {
       continue;
     }
     if (previous_covered_line != 0 && line_number > previous_covered_line + 1) {
@@ -146,6 +166,7 @@ int i8080_write_coverage_source_display(FILE *stream, const char *path,
     previous_covered_line = line_number;
   }
 
+  free(filtered_lines);
   free(line_hits);
   free(text);
   return 1;

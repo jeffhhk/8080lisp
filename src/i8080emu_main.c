@@ -192,6 +192,7 @@ static int parse_args(int argc, char **argv, int *emit_coverage,
                       int *capture_coverage,
                       int *display_coverage_source_on_exit,
                       const char **coverage_baseline_path,
+                      const char **coverage_baseline_boolean_path,
                       const char **coverage_out_path,
                       const char **program_path) {
   int i;
@@ -200,6 +201,7 @@ static int parse_args(int argc, char **argv, int *emit_coverage,
   *capture_coverage = 0;
   *display_coverage_source_on_exit = 0;
   *coverage_baseline_path = NULL;
+  *coverage_baseline_boolean_path = NULL;
   *coverage_out_path = NULL;
   *program_path = NULL;
 
@@ -230,6 +232,14 @@ static int parse_args(int argc, char **argv, int *emit_coverage,
       *coverage_baseline_path = argv[++i];
       continue;
     }
+    if (strcmp(argv[i], "--coverage-baseline-boolean") == 0) {
+      if (i + 1 >= argc) {
+        return 0;
+      }
+      *capture_coverage = 1;
+      *coverage_baseline_boolean_path = argv[++i];
+      continue;
+    }
     if (*program_path != NULL) {
       return 0;
     }
@@ -256,9 +266,11 @@ int main(int argc, char **argv) {
   };
   const char *program_path = NULL;
   const char *coverage_baseline_path = NULL;
+  const char *coverage_baseline_boolean_path = NULL;
   const char *coverage_out_path = NULL;
   i8080_coverage display_coverage;
   i8080_coverage baseline_coverage;
+  const i8080_coverage *display_line_filter = NULL;
   int capture_coverage = 0;
   int display_coverage_source_on_exit = 0;
   int emit_coverage = 0;
@@ -267,12 +279,14 @@ int main(int argc, char **argv) {
   if (!parse_args(argc, argv, &emit_coverage, &capture_coverage,
                   &display_coverage_source_on_exit,
                   &coverage_baseline_path,
+                  &coverage_baseline_boolean_path,
                   &coverage_out_path,
                   &program_path)) {
     fprintf(stderr,
             "usage: %s [--coverage] [--coverage-out path] "
             "[--coverage-source-display-on-exit] "
-            "[--coverage-baseline path] program.asm\n",
+            "[--coverage-baseline path] "
+            "[--coverage-baseline-boolean path] program.asm\n",
             argv[0]);
     return 1;
   }
@@ -304,9 +318,17 @@ int main(int argc, char **argv) {
       }
       subtract_coverage(&display_coverage, &baseline_coverage);
     }
+    if (coverage_baseline_boolean_path != NULL) {
+      if (!read_coverage_ndjson(coverage_baseline_boolean_path,
+                                &baseline_coverage)) {
+        return 1;
+      }
+      display_line_filter = &baseline_coverage;
+    }
     putchar('\n');
     if (!i8080_write_coverage_source_display(stdout, program_path, &image,
-                                             &display_coverage, &error)) {
+                                             &display_coverage,
+                                             display_line_filter, &error)) {
       fprintf(stderr, "%s: %s\n", program_path, error.message);
       return 1;
     }

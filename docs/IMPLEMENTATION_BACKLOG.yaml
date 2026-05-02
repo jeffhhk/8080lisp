@@ -164,3 +164,20 @@
   notes: |
     Current containment is to avoid relying on this query as a correctness
     example until the evaluator and renderer path are reconciled.
+
+- meta: {_: feature, id: PORT-0002M, status: done, priority: medium, guid: m3v6}
+  title: Add boolean baseline filtering for emulator source coverage display
+  expected_behavior: |
+    The emulator CLI should be able to hide any source line touched by a saved
+    NDJSON baseline while leaving the current run's original counts unchanged on
+    the remaining displayed lines.
+  evidence:
+    - evidence: `o/i8080emu` now accepts `--coverage-baseline-boolean path` in addition to the existing subtractive `--coverage-baseline path`.
+    - evidence: `src/i8080_coverage_source_display.c` now applies an optional baseline line filter derived from baseline-covered addresses before printing source lines.
+    - evidence: `tests/i8080_emu_test.c` validates that a line with residual hits is still removed entirely when its source line appears in the boolean baseline.
+  related:
+    - file: src/i8080_coverage_source_display.c
+    - file: src/i8080emu_main.c
+    - file: tests/i8080_emu_test.c
+    - file: docs/BUILD.md
+    - file: docs/Reference.md
