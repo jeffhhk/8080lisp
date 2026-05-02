@@ -2,12 +2,6 @@
 
 #include <string.h>
 
-enum {
-  I8080_STEP_OK = 0,
-  I8080_STEP_STOPPED = 1,
-  I8080_STEP_LIMIT = 2,
-};
-
 static uint16_t hl(const i8080_cpu *cpu) { return (uint16_t)(cpu->h << 8) | cpu->l; }
 static uint16_t bc(const i8080_cpu *cpu) { return (uint16_t)(cpu->b << 8) | cpu->c; }
 static uint16_t de(const i8080_cpu *cpu) { return (uint16_t)(cpu->d << 8) | cpu->e; }
@@ -400,6 +394,7 @@ int i8080_step(i8080_cpu *cpu) {
   case 0x3a: cpu->a = read_mem(cpu, read_word(cpu, cpu->pc)); cpu->pc = (uint16_t)(cpu->pc + 2); return I8080_STEP_OK;
   case 0x3c: cpu->a = (uint8_t)(cpu->a + 1); cpu->flags.ac = (uint8_t)(((cpu->a - 1) & 0x0f) == 0x0f); set_szp(cpu, cpu->a); return I8080_STEP_OK;
   case 0x3e: cpu->a = read_mem(cpu, cpu->pc++); return I8080_STEP_OK;
+  case 0x37: cpu->flags.cy = 1; return I8080_STEP_OK;
   case 0x76: cpu->halted = 1; return I8080_STEP_STOPPED;
   case 0xa7: set_logic_flags(cpu, cpu->a &= cpu->a, 1); return I8080_STEP_OK;
   case 0xaf: cpu->a = 0; set_logic_flags(cpu, cpu->a, 0); return I8080_STEP_OK;

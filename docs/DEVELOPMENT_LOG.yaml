@@ -369,3 +369,23 @@
       result: 21 tests 0 failures 0 skipped
     - verification: printf 'ORG 0000H\nHLT\n' > /tmp/i8080_cov_check.asm && ./o/i8080emu --coverage-out /tmp/i8080_cov_check.ndjson /tmp/i8080_cov_check.asm
       result: wrote an NDJSON coverage report with address and summary records
+- meta: {_: bug, guid: j4n2}
+  title: Stdin-driven emulator CLI should print fresh atom results and stop at EOF
+  prompt: |
+    Please give a command line invocation which can evaluate the constant 3, by piping a suitable input in through stdin, as in "Emulator examples" in Reference.md.
+    Please fix any bugs needed to make it work.
+  verifications:
+    - verification: make clean
+      result: removed build output under o/
+    - verification: make build
+      result: built o/lisp_gcc, o/i8080asm, o/i8080emu, and o/ocr_validator with gcc
+    - verification: make test
+      result: 22 tests 0 failures 0 skipped
+    - verification: inject an artificial failure into tests/i8080_emu_test.c and rerun make test
+      result: make test failed with "artificial failure before final success"
+    - verification: remove the artificial failure from tests/i8080_emu_test.c and rerun make test
+      result: 22 tests 0 failures 0 skipped
+    - verification: ./o/ocr_validator orig/lisp_8080_rawocr_2026-04-13.asm src/lisp_8080_corrected.asm docs/OCR_CORRECTIONS.yaml
+      result: validated the raw listing, corrected listing, and provenance ledger with explicit paths
+    - verification: printf '(LAMBDA (X) X) (3) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
+      result: printed >>3 and exited successfully after stdin EOF

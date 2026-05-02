@@ -374,12 +374,12 @@ PG6 ASSM 0 8000
 0294 E1             0367        POP  H
 0295 CD 96 01       0368        CALL APPLY    (FN=HL,X=DE,NULL)
 0298 CD 21 F0       0369        CALL CRLF
-029B 3E             0370        MVI  A,'>'
+029B 3E 3E          0370        MVI  A,'>'
 029D CD 09 F0       0371        CALL OUTC
 02A0 CD 09 F0       0372        CALL OUTC
 02A3 CD 50 00       0373        CALL OUTPUT
 02A6 C9             0374        RET
-02A7 D5             0375 MAKEATOM PUSH D
+02A7 E5             0375 MAKEATOM PUSH H
 02A8 C5             0376        PUSH B
 02A9 F5             0377        PUSH PSW
 02AA EB             0378        XCHG          D->INPUT STRING

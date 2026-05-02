@@ -5,9 +5,23 @@
 #include <stdio.h>
 #include <string.h>
 
+typedef struct {
+  i8080_cpu *cpu;
+  int saw_eof;
+} cli_host_io;
+
 static int host_inch(void *ctx) {
-  (void)ctx;
-  return getchar();
+  cli_host_io *host = ctx;
+  int ch = getchar();
+
+  if (ch == EOF) {
+    host->saw_eof = 1;
+    if (host->cpu != NULL) {
+      host->cpu->halted = 1;
+    }
+    return 0;
+  }
+  return ch;
 }
 
 static void host_outc(void *ctx, uint8_t ch) {
@@ -132,16 +146,21 @@ int main(int argc, char **argv) {
   i8080_image image;
   i8080_cpu cpu;
   i8080_coverage coverage;
+  cli_host_io host_io = {
+      .cpu = &cpu,
+      .saw_eof = 0,
+  };
   i8080_hooks hooks = {
       .inch = host_inch,
       .outc = host_outc,
       .abend = host_abend,
-      .ctx = NULL,
+      .ctx = &host_io,
   };
   const char *program_path = NULL;
   const char *coverage_out_path = NULL;
   int capture_coverage = 0;
   int emit_coverage = 0;
+  int run_result;
 
   if (!parse_args(argc, argv, &emit_coverage, &capture_coverage,
                   &coverage_out_path,
@@ -167,12 +186,16 @@ int main(int argc, char **argv) {
     i8080_set_coverage(&cpu, &coverage);
   }
   i8080_load_image(&cpu, &image);
-  i8080_run(&cpu, 10000000);
+  run_result = i8080_run(&cpu, 10000000);
   if (emit_coverage) {
     write_coverage_report(stderr, &coverage);
   }
   if (coverage_out_path != NULL &&
       !write_coverage_ndjson(coverage_out_path, &coverage)) {
+    return 1;
+  }
+  if (run_result == I8080_STEP_LIMIT) {
+    fprintf(stderr, "\nstep limit reached after %zu steps\n", cpu.steps);
     return 1;
   }
   if (cpu.error) {

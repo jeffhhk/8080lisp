@@ -90,3 +90,4 @@ This manual reflects the behavior validated by the current `make test` fixture.
 ### Emulator examples
 
     printf 'CAR ((T.F)) \n' | ./o/i8080emu src/lisp_8080_corrected.asm
+    printf '(LAMBDA (X) X) (3) \n' | ./o/i8080emu src/lisp_8080_corrected.asm

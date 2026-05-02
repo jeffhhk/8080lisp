@@ -13,6 +13,12 @@ enum {
   I8080_HOOK_CRLF = 0xf021,
 };
 
+enum {
+  I8080_STEP_OK = 0,
+  I8080_STEP_STOPPED = 1,
+  I8080_STEP_LIMIT = 2,
+};
+
 typedef int (*i8080_inch_fn)(void *ctx);
 typedef void (*i8080_outc_fn)(void *ctx, uint8_t ch);
 typedef void (*i8080_abend_fn)(void *ctx, uint8_t code);

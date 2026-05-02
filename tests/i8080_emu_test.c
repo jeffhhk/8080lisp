@@ -228,17 +228,47 @@ static void test_cli_writes_coverage_ndjson(void) {
                   "{\"kind\":\"summary\",\"covered_addresses\":4,\"total_instruction_fetches\":8}");
 }
 
+static void test_cli_evaluates_identity_lambda_of_three_from_stdin(void) {
+  char output_path[128];
+  char command[320];
+  char output_text[1024];
+  int status;
+
+  snprintf(output_path, sizeof(output_path), "/tmp/i8080_cli_output_%ld.txt",
+           (long)getpid());
+  snprintf(command, sizeof(command),
+           "printf '(LAMBDA (X) X) (3) \\\\n' | ./o/i8080emu src/lisp_8080_corrected.asm > %s",
+           output_path);
+  status = system(command);
+  if (status == -1) {
+    fprintf(stderr, "stdin cli command failed to launch\n");
+    failures += 1;
+    return;
+  }
+  if (!WIFEXITED(status)) {
+    fprintf(stderr, "stdin cli command did not exit cleanly\n");
+    failures += 1;
+    return;
+  }
+  expect_int("stdin cli command exited", WEXITSTATUS(status), 0);
+  if (!read_file_text(output_path, output_text, sizeof(output_text))) {
+    return;
+  }
+  expect_text("stdin cli output", output_text, "\n>>3");
+}
+
 int main(void) {
   test_monitor_hooks_work_in_the_emulator();
   test_instruction_pointer_coverage_counts_executed_addresses();
   test_original_image_boots_to_the_monitor_loop();
   test_cli_writes_coverage_ndjson();
+  test_cli_evaluates_identity_lambda_of_three_from_stdin();
 
   if (failures != 0) {
-    fprintf(stderr, "4 tests %d failures 0 skipped\n", failures);
+    fprintf(stderr, "5 tests %d failures 0 skipped\n", failures);
     return 1;
   }
 
-  puts("4 tests 0 failures 0 skipped");
+  puts("5 tests 0 failures 0 skipped");
   return 0;
 }
