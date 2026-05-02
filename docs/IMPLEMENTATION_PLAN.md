@@ -48,8 +48,12 @@ Take advantage of overlapping routines, e.g.:
 Preserve label names when possible, e.g. CDR:
     000F C9             0020 CDR    PUSH PSW
 
-Preserve comments, e.g. "MONITOR REENTRY":
+Preserve comments whenever they are more than a copy of the instruction, e.g.:
     EQU 0F000H  MONITOR REENTRY
+    . . .
+    INX  H        SKIP CAR PTR
+    . . .
+    LXI  D,4      NEED 4 BYTES
 
 ## Change constraints
 
