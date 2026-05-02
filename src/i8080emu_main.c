@@ -283,11 +283,18 @@ int main(int argc, char **argv) {
                   &coverage_out_path,
                   &program_path)) {
     fprintf(stderr,
-            "usage: %s [--coverage] [--coverage-out path] "
+            "usage:\n"
+            "    %s [--coverage] [--coverage-out path] "
             "[--coverage-source-display-on-exit] "
             "[--coverage-baseline path] "
-            "[--coverage-baseline-boolean path] program.asm\n",
-            argv[0]);
+            "[--coverage-baseline-boolean path] program.asm\n\n"
+            "Example:\n"
+            "    unzip %s src/lisp_8080_corrected.asm\n"
+            "    printf 'NULL (NIL) \\n' | %s src/lisp_8080_corrected.asm\n\n"
+            "        >>T\n\n"
+            "%s is a Cosmopolitan binary and includes its own source code, article, and documentation.  Extract as follows:\n"
+            "    unzip %s\n"
+            , argv[0], argv[0], argv[0], argv[0], argv[0]);
     return 1;
   }
 
