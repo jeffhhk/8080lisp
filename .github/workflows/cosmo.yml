@@ -21,7 +21,11 @@ jobs:
       - name: Install cosmocc
         run: |
           mkdir -p "$HOME/bin/cosmo"
-          curl -fsSL "https://justine.lol/cosmopolitan/cosmocc-${COSMOCC_VERSION}.zip" -o /tmp/cosmocc.zip
+          curl --fail --location --silent --show-error \
+            --retry 5 --retry-delay 2 --retry-connrefused \
+            --continue-at - \
+            "https://justine.lol/cosmopolitan/cosmocc-${COSMOCC_VERSION}.zip" \
+            -o /tmp/cosmocc.zip
           unzip -oq /tmp/cosmocc.zip -d "$HOME/bin/cosmo"
           "$HOME/bin/cosmo/bin/x86_64-unknown-cosmo-cc" --version
 

@@ -327,3 +327,23 @@
     - task: PORT-0002T
     - file: .github/workflows/release.yml
     - file: docs/BUILD.md
+
+- meta: {_: bug, id: PORT-0002V, status: done, priority: medium, guid: v7x5}
+  title: Cosmocc download should retry truncated GitHub Actions transfers
+  expected_behavior: |
+    The CI workflows that install `cosmocc` should tolerate transient truncated
+    downloads from `justine.lol` instead of failing the build on the first short
+    transfer.
+  evidence:
+    - evidence: "The GitHub Actions log failed during `curl -fsSL ... -o /tmp/cosmocc.zip` with `curl: (18) transfer closed with 278939774 bytes remaining to read`."
+    - evidence: "Both `.github/workflows/cosmo.yml` and `.github/workflows/release.yml` used the same single-attempt `curl` invocation, so the artifact and release pipelines shared the same failure mode."
+    - evidence: "Both workflows now use `curl` retry flags plus `--continue-at -`, which allows resumed downloads after transient network interruption."
+  acceptance:
+    - acceptance: Keep the Cosmopolitan install path unchanged apart from download resilience.
+    - acceptance: Apply the same hardened download behavior to both CI workflows.
+    - acceptance: Preserve the existing `make build-cosmo` packaging path after the download step.
+  related:
+    - task: PORT-0002T
+    - task: PORT-0002U
+    - file: .github/workflows/cosmo.yml
+    - file: .github/workflows/release.yml
